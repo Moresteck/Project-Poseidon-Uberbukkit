@@ -21,6 +21,7 @@ public final class PluginDescriptionFile {
     private static final Yaml yaml = new Yaml(new SafeConstructor());
     private String name = null;
     private String main = null;
+    private String classLoaderOf = null;
     private ArrayList<String> depend = null;
     private ArrayList<String> softDepend = null;
     private String version = null;
@@ -153,6 +154,10 @@ public final class PluginDescriptionFile {
         return permissions;
     }
 
+    public String getClassLoaderOf() {
+        return classLoaderOf;
+    }
+
     private void loadMap(Map<String, Object> map) throws InvalidDescriptionException {
         try {
             name = map.get("name").toString();
@@ -191,6 +196,10 @@ public final class PluginDescriptionFile {
             } catch (ClassCastException ex) {
                 throw new InvalidDescriptionException(ex, "commands are of wrong type");
             }
+        }
+
+        if (map.containsKey("class-loader-of")) {
+            classLoaderOf = map.get("class-loader-of").toString();
         }
 
         if (map.containsKey("depend")) {
@@ -312,6 +321,10 @@ public final class PluginDescriptionFile {
             map.put("author", authors.get(0));
         } else if (authors.size() > 1) {
             map.put("authors", authors);
+        }
+
+        if (classLoaderOf != null) {
+            map.put("class-loader-of", classLoaderOf);
         }
 
         return map;

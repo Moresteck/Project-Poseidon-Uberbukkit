@@ -16,6 +16,15 @@ public class Packet53BlockChange extends Packet {
         this.k = true;
     }
 
+    public Packet53BlockChange(int i, int j, int k, int material, int data) {
+        this.k = true;
+        this.a = i;
+        this.b = j;
+        this.c = k;
+        this.material = material;
+        this.data = data;
+    }
+
     public Packet53BlockChange(int i, int j, int k, World world) {
         this.k = true;
         this.a = i;

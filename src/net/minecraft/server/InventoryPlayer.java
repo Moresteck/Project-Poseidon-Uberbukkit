@@ -1,9 +1,12 @@
 package net.minecraft.server;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class InventoryPlayer implements IInventory {
 
     public ItemStack[] items = new ItemStack[36];
     public ItemStack[] armor = new ItemStack[4];
+    public ItemStack[] craft = new ItemStack[4];
     public int itemInHandIndex = 0;
     public EntityHuman d; // CraftBukkit - private -> public
     private ItemStack f;
@@ -230,12 +233,22 @@ public class InventoryPlayer implements IInventory {
             }
         }
 
+        for (i = 0; i < this.craft.length; ++i) {
+            if (this.craft[i] != null) {
+                nbttagcompound = new NBTTagCompound();
+                nbttagcompound.a("Slot", (byte) (i + 80));
+                this.craft[i].a(nbttagcompound);
+                nbttaglist.a((NBTBase) nbttagcompound);
+            }
+        }
+
         return nbttaglist;
     }
 
     public void b(NBTTagList nbttaglist) {
         this.items = new ItemStack[36];
         this.armor = new ItemStack[4];
+        this.craft = new ItemStack[4];
 
         for (int i = 0; i < nbttaglist.c(); ++i) {
             NBTTagCompound nbttagcompound = (NBTTagCompound) nbttaglist.a(i);
@@ -249,6 +262,10 @@ public class InventoryPlayer implements IInventory {
 
                 if (j >= 100 && j < this.armor.length + 100) {
                     this.armor[j - 100] = itemstack;
+                }
+
+                if (j >= 80 && j < this.craft.length + 80) {
+                    this.craft[j - 80] = itemstack;
                 }
             }
         }

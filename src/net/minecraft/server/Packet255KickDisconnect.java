@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class Packet255KickDisconnect extends Packet {
 
     public String a;
@@ -15,11 +17,21 @@ public class Packet255KickDisconnect extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = a(datainputstream, 100);
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 11) {
+            this.a = a(datainputstream, 100);
+        } else {
+            this.a = datainputstream.readUTF();
+        }
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        a(this.a, dataoutputstream);
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 11) {
+            a(this.a, dataoutputstream);
+        } else {
+            dataoutputstream.writeUTF(this.a);
+        }
     }
 
     public void a(NetHandler nethandler) {

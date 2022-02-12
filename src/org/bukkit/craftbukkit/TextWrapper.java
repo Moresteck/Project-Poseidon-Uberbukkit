@@ -85,4 +85,42 @@ public class TextWrapper {
         // Return it split
         return out.toString().split("\n");
     }
+
+    // uberbukkit
+    public static String[] wrapTextLegacy(final String text) {
+        final StringBuilder out = new StringBuilder();
+        char colorChar = 'f';
+        int lineWidth = 0;
+        boolean hasColored = true;
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            if (ch == '\u00A7' && i < text.length() - 1) {
+                i++;
+                colorChar = text.charAt(i);
+                hasColored = false;
+                continue;
+            } else if (ch >= characterWidths.length) {
+                ch = (char) (characterWidths.length - 1);
+            }
+            final int width = characterWidths[(int) ch];
+            if (lineWidth + width >= CHAT_WINDOW_WIDTH) {
+                out.append('\n');
+                if (colorChar != 'f') {
+                    out.append('\u00A7');
+                    out.append(colorChar);
+                }
+                out.append(ch);
+                lineWidth = width;
+            } else {
+                if (!hasColored) {
+                    out.append('\u00A7');
+                    out.append(colorChar);
+                    hasColored = true;
+                }
+                out.append(ch);
+                lineWidth += width;
+            }
+        }
+        return out.toString().split("\n");
+    }
 }

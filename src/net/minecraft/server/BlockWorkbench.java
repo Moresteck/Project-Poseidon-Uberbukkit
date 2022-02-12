@@ -15,6 +15,11 @@ public class BlockWorkbench extends Block {
         if (world.isStatic) {
             return true;
         } else {
+            // uberbukkit
+            if (entityhuman instanceof EntityPlayer) {
+                ((EntityPlayer)entityhuman).isInWorkbench = true;
+            }
+
             entityhuman.b(i, j, k);
             return true;
         }

@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class EntityTracker {
 
     private Set a = new HashSet();
@@ -37,10 +39,11 @@ public class EntityTracker {
             this.a(entity, 64, 5, true);
         } else if (entity instanceof EntityArrow) {
             this.a(entity, 64, 20, false);
-        } else if (entity instanceof EntityFireball) {
-            this.a(entity, 64, 10, false);
-        } else if (entity instanceof EntitySnowball) {
+            // uberbukkit
+        } else if (entity instanceof EntitySnowball || (entity instanceof EntityFireball && Uberbukkit.getPVN() < 12)) {
             this.a(entity, 64, 10, true);
+        } else if (entity instanceof EntityFireball && Uberbukkit.getPVN() >= 12) {
+            this.a(entity, 64, 10, false);
         } else if (entity instanceof EntityEgg) {
             this.a(entity, 64, 10, true);
         } else if (entity instanceof EntityItem) {

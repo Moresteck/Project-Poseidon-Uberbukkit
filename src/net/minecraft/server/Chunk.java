@@ -13,8 +13,8 @@ public class Chunk {
     public NibbleArray g;
     public byte[] heightMap;
     public int i;
-    public final int x;
-    public final int z;
+    public int x; // UBERBUKKIT non-final
+    public int z; // UBERBUKKIT non-final
     public Map tileEntities;
     public List[] entitySlices;
     public boolean done;

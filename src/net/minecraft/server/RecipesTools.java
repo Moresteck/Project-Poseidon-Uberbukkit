@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class RecipesTools {
 
     private String[][] a = new String[][] { { "XXX", " # ", " # "}, { "X", "#", "#"}, { "XX", "X#", " #"}, { "XX", " #", " #"}};
@@ -20,6 +22,9 @@ public class RecipesTools {
             }
         }
 
-        craftingmanager.registerShapedRecipe(new ItemStack(Item.SHEARS), new Object[] { " #", "# ", Character.valueOf('#'), Item.IRON_INGOT});
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 14) {
+            craftingmanager.registerShapedRecipe(new ItemStack(Item.SHEARS), new Object[] { " #", "# ", Character.valueOf('#'), Item.IRON_INGOT});
+        }
     }
 }

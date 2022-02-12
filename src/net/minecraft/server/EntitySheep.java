@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import java.util.Random;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 public class EntitySheep extends EntityAnimal {
 
     public static final float[][] a = new float[][] { { 1.0F, 1.0F, 1.0F}, { 0.95F, 0.7F, 0.2F}, { 0.9F, 0.5F, 0.85F}, { 0.6F, 0.7F, 0.95F}, { 0.9F, 0.9F, 0.2F}, { 0.5F, 0.8F, 0.1F}, { 0.95F, 0.7F, 0.8F}, { 0.3F, 0.3F, 0.3F}, { 0.6F, 0.6F, 0.6F}, { 0.3F, 0.6F, 0.7F}, { 0.7F, 0.4F, 0.9F}, { 0.2F, 0.4F, 0.8F}, { 0.5F, 0.4F, 0.3F}, { 0.4F, 0.5F, 0.2F}, { 0.8F, 0.3F, 0.3F}, { 0.1F, 0.1F, 0.1F}};
@@ -18,6 +20,20 @@ public class EntitySheep extends EntityAnimal {
     }
 
     public boolean damageEntity(Entity entity, int i) {
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.mechanics.sheep_drop_wool_on_punch", false)) {
+            if (!this.world.isStatic && !this.isSheared() && entity instanceof EntityLiving) {
+                this.setSheared(true);
+                int j = 1 + this.random.nextInt(3);
+                for (int k = 0; k < j; ++k) {
+                    EntityItem entityitem = this.a(new ItemStack(Block.WOOL.id, 1, this.getColor()), 1.0F);
+                    entityitem.motY += (double) (this.random.nextFloat() * 0.05F);
+                    entityitem.motX += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+                    entityitem.motZ += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+                }
+            }
+        }
+
         return super.damageEntity(entity, i);
     }
 
@@ -119,6 +135,22 @@ public class EntitySheep extends EntityAnimal {
     public static int a(Random random) {
         int i = random.nextInt(100);
 
-        return i < 5 ? 15 : (i < 10 ? 7 : (i < 15 ? 8 : (i < 18 ? 12 : (random.nextInt(500) == 0 ? 6 : 0))));
+        // uberbukkit
+        boolean spawn_black = PoseidonConfig.getInstance().getBoolean("version.mechanics.spawn_sheep_with_shades_of_black", true);
+        boolean spawn_brown_pink = PoseidonConfig.getInstance().getBoolean("version.mechanics.spawn_brown_and_pink_sheep", true);
+
+        if (i < 5 && spawn_black) {
+            return 15;
+        } else if (i < 10 && spawn_black) {
+            return 7;
+        } else if (i < 15 && spawn_black) {
+            return 8;
+        } else if (i < 18 && spawn_brown_pink) {
+            return 12;
+        } else if (spawn_brown_pink && random.nextInt(500) == 0) {
+            return 6;
+        } else {
+            return 0;
+        }
     }
 }

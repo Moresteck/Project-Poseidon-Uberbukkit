@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import org.bukkit.event.block.LeavesDecayEvent;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 import java.util.Random;
 
 public class BlockLeaves extends BlockLeavesBase {
@@ -126,7 +128,13 @@ public class BlockLeaves extends BlockLeavesBase {
         if (event.isCancelled()) return;
         // CraftBukkit end
 
-        this.g(world, i, j, k, world.getData(i, j, k));
+        int data = world.getData(i, j, k);
+        // uberbukkit
+        if (data > 0 && !PoseidonConfig.getInstance().getBoolean("version.mechanics.drop_saplings_of_leaf_type", true)) {
+            data = 0;
+        }
+
+        this.g(world, i, j, k, data);
         world.setTypeId(i, j, k, 0);
     }
 

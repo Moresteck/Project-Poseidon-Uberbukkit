@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
 
 import net.minecraft.server.IInventory;
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryTransactionEvent;
@@ -52,6 +54,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
 
         for (int i = 0; i < items.length; i++) {
             ItemStack item = items[i];
+            // uberbukkit
+        	if (item != null && !Uberbukkit.getProtocolHandler().canReceiveBlockItem(item.getTypeId())) {
+        		continue;
+        	}
+
             if (item == null || item.getTypeId() <= 0) {
                 mcItems[i] = null;
             } else {
@@ -61,6 +68,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public void setItem(int index, ItemStack item) {
+    	// uberbukkit
+    	if (item != null && !Uberbukkit.getProtocolHandler().canReceiveBlockItem(item.getTypeId())) {
+    		item = null;
+    	}
+
         getInventory().setItem(index, (item == null ? null : new net.minecraft.server.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability())));
     }
 
@@ -224,6 +236,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
 
         for (int i = 0; i < items.length; i++) {
             ItemStack item = items[i];
+
+            // uberbukkit
+        	if (item != null && !Uberbukkit.getProtocolHandler().canReceiveBlockItem(item.getTypeId())) {
+        		return leftover;
+        	}
             
             // Poseidon
             InventoryTransactionEvent event = new InventoryTransactionEvent(InventoryTransactionType.ITEM_ADDED, this, item);

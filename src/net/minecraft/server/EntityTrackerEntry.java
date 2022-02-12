@@ -1,15 +1,22 @@
 package net.minecraft.server;
 
-import org.bukkit.entity.Player;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.bukkit.entity.Player;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class EntityTrackerEntry {
 
     public Entity tracker;
+    // uberbukkit
+    public boolean b_ = false;
+    public boolean c_ = false;
+    public boolean d_ = false;
+
     public int b;
     public int c;
     public int d;
@@ -63,8 +70,8 @@ public class EntityTrackerEntry {
 
         ++this.t;
         if (++this.l % this.c == 0) {
-        	// encoded means multiplied by 32
-        	// this is required to send it to the client, as the relative position is sent as the float multiplied by 32
+            // encoded means multiplied by 32
+            // this is required to send it to the client, as the relative position is sent as the float multiplied by 32
             int newEncodedPosX = MathHelper.floor(this.tracker.locX * 32.0D);
             int newEncodedPosY = MathHelper.floor(this.tracker.locY * 32.0D);
             int newEncodedPosZ = MathHelper.floor(this.tracker.locZ * 32.0D);
@@ -79,14 +86,14 @@ public class EntityTrackerEntry {
             int movementUpdateTreshold = 1;
             int rotationUpdateTreshold = 1;
             boolean needsPositionUpdate = Math.abs(encodedDiffX) >= movementUpdateTreshold || Math.abs(encodedDiffY) >= movementUpdateTreshold || Math.abs(encodedDiffZ) >= movementUpdateTreshold
-            		|| tracker instanceof EntityBoat || tracker instanceof EntityMinecart;
-            
+                    || tracker instanceof EntityBoat || tracker instanceof EntityMinecart;
+
             boolean needsRotationUpdate = Math.abs(newEncodedRotationYaw - this.g) >= rotationUpdateTreshold || Math.abs(newEncodedRotationPitch - this.h) >= rotationUpdateTreshold;
 
             if (encodedDiffX >= -128 && encodedDiffX < 128 && encodedDiffY >= -128 && encodedDiffY < 128 && encodedDiffZ >= -128 && encodedDiffZ < 128 && this.t <= 400) {
-            	// entity has moved less than 4 blocks
+                // entity has moved less than 4 blocks
                 if (needsPositionUpdate && needsRotationUpdate) {
-                	packet = new Packet33RelEntityMoveLook(this.tracker.id, (byte) encodedDiffX, (byte) encodedDiffY, (byte) encodedDiffZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
+                    packet = new Packet33RelEntityMoveLook(this.tracker.id, (byte) encodedDiffX, (byte) encodedDiffY, (byte) encodedDiffZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
                 } else if (needsPositionUpdate) {
                     packet = new Packet31RelEntityMove(this.tracker.id, (byte) encodedDiffX, (byte) encodedDiffY, (byte) encodedDiffZ);
                 } else if (needsRotationUpdate) {
@@ -121,10 +128,39 @@ public class EntityTrackerEntry {
                 this.a((Packet) packet);
             }
 
-            DataWatcher datawatcher = this.tracker.aa();
+            // uberbukkit
+            if (Uberbukkit.getProtocolHandler().canReceivePacket(40)) {
+                DataWatcher datawatcher = this.tracker.aa();
 
-            if (datawatcher.a()) {
-                this.b((Packet) (new Packet40EntityMetadata(this.tracker.id, datawatcher)));
+                if (datawatcher.a()) {
+                    this.b((Packet) (new Packet40EntityMetadata(this.tracker.id, datawatcher)));
+                }
+            } else {
+                if (this.b_ && this.tracker.vehicle == null) {
+                    this.b_ = false;
+                    this.b((Packet) (new Packet18ArmAnimation(this.tracker, 101)));
+                } else if (!this.b_ && this.tracker.vehicle != null) {
+                    this.b_ = true;
+                    this.b((Packet) (new Packet18ArmAnimation(this.tracker, 100)));
+                }
+
+                if (this.tracker instanceof EntityLiving) {
+                    if (this.d_ && !this.tracker.isSneaking()) {
+                        this.d_ = false;
+                        this.b((Packet) (new Packet18ArmAnimation(this.tracker, 105)));
+                    } else if (!this.d_ && this.tracker.isSneaking()) {
+                        this.d_ = true;
+                        this.b((Packet) (new Packet18ArmAnimation(this.tracker, 104)));
+                    }
+                }
+
+                if (this.c_ && this.tracker.fireTicks <= 0) {
+                    this.c_ = false;
+                    this.b((Packet) (new Packet18ArmAnimation(this.tracker, 103)));
+                } else if (!this.c_ && this.tracker.fireTicks > 0) {
+                    this.c_ = true;
+                    this.b((Packet) (new Packet18ArmAnimation(this.tracker, 102)));
+                }
             }
 
             if (needsPositionUpdate) {
@@ -210,6 +246,22 @@ public class EntityTrackerEntry {
                     // CraftBukkit end
                     this.trackedPlayers.add(entityplayer);
                     entityplayer.netServerHandler.sendPacket(this.b());
+
+                    // uberbukkit
+                    if (!Uberbukkit.getProtocolHandler().canReceivePacket(40)) {
+                        if (this.d_) {
+                            entityplayer.netServerHandler.sendPacket((Packet) (new Packet18ArmAnimation(this.tracker, 104)));
+                        }
+
+                        if (this.b_) {
+                            entityplayer.netServerHandler.sendPacket((Packet) (new Packet18ArmAnimation(this.tracker, 100)));
+                        }
+
+                        if (this.c_) {
+                            entityplayer.netServerHandler.sendPacket((Packet) (new Packet18ArmAnimation(this.tracker, 102)));
+                        }
+                    }
+
                     if (this.isMoving) {
                         entityplayer.netServerHandler.sendPacket(new Packet28EntityVelocity(this.tracker.id, this.tracker.motX, this.tracker.motY, this.tracker.motZ));
                     }
@@ -225,7 +277,8 @@ public class EntityTrackerEntry {
                     if (this.tracker instanceof EntityHuman) {
                         EntityHuman entityhuman = (EntityHuman) this.tracker;
 
-                        if (entityhuman.isSleeping()) {
+                        // uberbukkit
+                        if (entityhuman.isSleeping() && Uberbukkit.getProtocolHandler().canReceivePacket(17)) {
                             entityplayer.netServerHandler.sendPacket(new Packet17(this.tracker, 0, MathHelper.floor(this.tracker.locX), MathHelper.floor(this.tracker.locY), MathHelper.floor(this.tracker.locZ)));
                         }
                     }
@@ -287,9 +340,10 @@ public class EntityTrackerEntry {
                 EntityLiving entityliving = ((EntityArrow) this.tracker).shooter;
 
                 return new Packet23VehicleSpawn(this.tracker, 60, entityliving != null ? entityliving.id : this.tracker.id);
-            } else if (this.tracker instanceof EntitySnowball) {
+                // uberbukkit
+            } else if (this.tracker instanceof EntitySnowball || (this.tracker instanceof EntityFireball && Uberbukkit.getPVN() < 12)) {
                 return new Packet23VehicleSpawn(this.tracker, 61);
-            } else if (this.tracker instanceof EntityFireball) {
+            } else if (this.tracker instanceof EntityFireball && Uberbukkit.getPVN() >= 12) {
                 EntityFireball entityfireball = (EntityFireball) this.tracker;
                 // CraftBukkit start - added check for null shooter
                 int shooter = ((EntityFireball) this.tracker).shooter != null ? ((EntityFireball) this.tracker).shooter.id : 1;

@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class Packet23VehicleSpawn extends Packet {
 
     public int a;
@@ -71,11 +73,16 @@ public class Packet23VehicleSpawn extends Packet {
         this.b = datainputstream.readInt();
         this.c = datainputstream.readInt();
         this.d = datainputstream.readInt();
-        this.i = datainputstream.readInt();
-        if (this.i > 0) {
-            this.e = datainputstream.readShort();
-            this.f = datainputstream.readShort();
-            this.g = datainputstream.readShort();
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 13) {
+            this.i = datainputstream.readInt();
+            if (this.i > 0) {
+                this.e = datainputstream.readShort();
+                this.f = datainputstream.readShort();
+                this.g = datainputstream.readShort();
+            }
+        } else {
+            this.i = 0;
         }
     }
 
@@ -85,11 +92,14 @@ public class Packet23VehicleSpawn extends Packet {
         dataoutputstream.writeInt(this.b);
         dataoutputstream.writeInt(this.c);
         dataoutputstream.writeInt(this.d);
-        dataoutputstream.writeInt(this.i);
-        if (this.i > 0) {
-            dataoutputstream.writeShort(this.e);
-            dataoutputstream.writeShort(this.f);
-            dataoutputstream.writeShort(this.g);
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 13) {
+            dataoutputstream.writeInt(this.i);
+            if (this.i > 0) {
+                dataoutputstream.writeShort(this.e);
+                dataoutputstream.writeShort(this.f);
+                dataoutputstream.writeShort(this.g);
+            }
         }
     }
 
@@ -98,6 +108,7 @@ public class Packet23VehicleSpawn extends Packet {
     }
 
     public int a() {
-        return 21 + this.i > 0 ? 6 : 0;
+        // uberbukkit
+        return Uberbukkit.getPVN() >= 13 ? (21 + this.i > 0 ? 6 : 0) : 17;
     }
 }

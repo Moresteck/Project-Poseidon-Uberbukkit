@@ -114,13 +114,15 @@ public class Block {
     public static final Block PUMPKIN = (new BlockPumpkin(86, 102, false)).c(1.0F).a(e).a("pumpkin").g();
     public static final Block NETHERRACK = (new BlockBloodStone(87, 103)).c(0.4F).a(h).a("hellrock");
     public static final Block SOUL_SAND = (new BlockSlowSand(88, 104)).c(0.5F).a(l).a("hellsand");
-    public static final Block GLOWSTONE = (new BlockLightStone(89, 105, Material.STONE)).c(0.3F).a(j).a(1.0F).a("lightgem");
+    // uberbukkit
+    public static final Block GLOWSTONE = !PoseidonConfig.getInstance().getBoolean("version.mechanics.glowstone_pre1_6_6", false) ? (new BlockLightStone(89, 105, Material.STONE)).c(0.3F).a(j).a(1.0F).a("lightgem") : (new BlockLightStone(89, 105, Material.SHATTERABLE)).c(0.3F).a(j).a(1.0F).a("lightgem");
     public static final BlockPortal PORTAL = (BlockPortal) (new BlockPortal(90, 14)).c(-1.0F).a(j).a(0.75F).a("portal");
     public static final Block JACK_O_LANTERN = (new BlockPumpkin(91, 102, true)).c(1.0F).a(e).a(1.0F).a("litpumpkin").g();
     public static final Block CAKE_BLOCK = (new BlockCake(92, 121)).c(0.5F).a(k).a("cake").n().g();
     public static final Block DIODE_OFF = (new BlockDiode(93, false)).c(0.0F).a(e).a("diode").n().g();
     public static final Block DIODE_ON = (new BlockDiode(94, true)).c(0.0F).a(0.625F).a(e).a("diode").n().g();
-    public static final Block LOCKED_CHEST = (new BlockLockedChest(95)).c(0.0F).a(1.0F).a(e).a("lockedchest").a(true).g();
+    // uberbukkit
+    public static final Block LOCKED_CHEST = !PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_steveco_chests", false) ? (new BlockLockedChest(95)).c(0.0F).a(1.0F).a(e).a("lockedchest").a(true).g() : (new BlockLockedChest(95)).c(-1.0F).a(1.0F).a(e).a("lockedchest").g();
     public static final Block TRAP_DOOR = (new BlockTrapdoor(96, Material.WOOD)).c(3.0F).a(e).a("trapdoor").n().g();
     public static final List<Integer> leafDecayBlacklist = Arrays.asList(PoseidonConfig.getInstance().getTreeBlacklistIDs());
     public int textureId;

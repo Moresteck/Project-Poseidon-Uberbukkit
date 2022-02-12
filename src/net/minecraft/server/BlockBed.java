@@ -3,6 +3,8 @@ package net.minecraft.server;
 import java.util.Iterator;
 import java.util.Random;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 public class BlockBed extends Block {
 
     public static final int[][] a = new int[][] { { 0, 1}, { -1, 0}, { 0, -1}, { 1, 0}};
@@ -30,7 +32,8 @@ public class BlockBed extends Block {
                 l = world.getData(i, j, k);
             }
 
-            if (!world.worldProvider.d()) {
+            // uberbukkit
+            if (!world.worldProvider.d() && PoseidonConfig.getInstance().getBoolean("version.mechanics.nether_bed_explode", true)) {
                 double d0 = (double) i + 0.5D;
                 double d1 = (double) j + 0.5D;
                 double d2 = (double) k + 0.5D;

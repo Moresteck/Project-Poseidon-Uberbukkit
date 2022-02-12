@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class Packet103SetSlot extends Packet {
 
     public int a;
@@ -29,7 +31,13 @@ public class Packet103SetSlot extends Packet {
 
         if (short1 >= 0) {
             byte b0 = datainputstream.readByte();
-            short short2 = datainputstream.readShort();
+            short short2 = 0;
+            // uberbukkit
+            if (Uberbukkit.getPVN() >= 8) {
+                short2 = datainputstream.readShort();
+            } else {
+                short2 = datainputstream.readByte();
+            }
 
             this.c = new ItemStack(short1, b0, short2);
         } else {
@@ -45,11 +53,17 @@ public class Packet103SetSlot extends Packet {
         } else {
             dataoutputstream.writeShort(this.c.id);
             dataoutputstream.writeByte(this.c.count);
-            dataoutputstream.writeShort(this.c.getData());
+            // uberbukkit
+            if (Uberbukkit.getPVN() >= 8) {
+                dataoutputstream.writeShort(this.c.getData());
+            } else {
+                dataoutputstream.writeByte(this.c.getData());
+            }
         }
     }
 
     public int a() {
-        return 8;
+        // uberbukkit
+        return Uberbukkit.getPVN() >= 8 ? 8 : 7;
     }
 }

@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import java.util.Random;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 public class BlockTorch extends Block {
 
     protected BlockTorch(int i, int j) {
@@ -22,7 +24,9 @@ public class BlockTorch extends Block {
     }
 
     private boolean g(World world, int i, int j, int k) {
-        return world.e(i, j, k) || world.getTypeId(i, j, k) == Block.FENCE.id;
+        return world.e(i, j, k) ||
+                // uberbukkit
+                (PoseidonConfig.getInstance().getBoolean("version.mechanics.allow_1_7_fence_placement", true) && world.getTypeId(i, j, k) == Block.FENCE.id);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {

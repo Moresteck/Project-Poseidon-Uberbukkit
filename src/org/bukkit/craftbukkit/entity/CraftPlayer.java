@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.entity;
 
 import com.projectposeidon.ConnectionType;
 import net.minecraft.server.*;
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -95,6 +97,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendRawMessage(String message) {
+    	// uberbukkit - fix worldedit cui
+    	if (Uberbukkit.getPVN() < 11 && message.equals("\u00A75\u00A76\u00A74\u00A75")) return;
+
         getHandle().netServerHandler.sendPacket(new Packet3Chat(message));
     }
 
@@ -178,6 +183,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void playEffect(Location loc, Effect effect, int data) {
+    	// uberbukkit
+    	if (!Uberbukkit.getProtocolHandler().canReceivePacket(61)) {
+    		return;
+    	}
+
         int packetData = effect.getId();
         Packet61 packet = new Packet61(packetData, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), data);
         getHandle().netServerHandler.sendPacket(packet);
@@ -330,6 +340,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     private void sendStatistic(int id, int amount) {
+    	// uberbukkit
+    	if (!Uberbukkit.getProtocolHandler().canReceivePacket(200)) {
+    		return;
+    	}
+
         while (amount > Byte.MAX_VALUE) {
             sendStatistic(id, Byte.MAX_VALUE);
             amount -= Byte.MAX_VALUE;

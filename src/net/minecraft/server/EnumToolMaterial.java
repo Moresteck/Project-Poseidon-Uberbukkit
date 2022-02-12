@@ -1,8 +1,12 @@
 package net.minecraft.server;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public enum EnumToolMaterial {
 
-    WOOD("WOOD", 0, 0, 59, 2.0F, 0), STONE("STONE", 1, 1, 131, 4.0F, 1), IRON("IRON", 2, 2, 250, 6.0F, 2), DIAMOND("EMERALD", 3, 3, 1561, 8.0F, 3), GOLD("GOLD", 4, 0, 32, 12.0F, 0);
+    // TODO old tool durability etc
+    // TODO old ore generation, pre-b1.2
+    WOOD("WOOD", 0, 0, Uberbukkit.getPVN() >= 8 ? 59 : 32, 2.0F, 0), STONE("STONE", 1, 1, Uberbukkit.getPVN() >= 8 ? 131 : 64, 4.0F, 1), IRON("IRON", 2, 2, Uberbukkit.getPVN() >= 8 ? 250 : 128, 6.0F, 2), DIAMOND("EMERALD", 3, 3, Uberbukkit.getPVN() >= 8 ? 1561 : 1024, 8.0F, 3), GOLD("GOLD", 4, 0, 32, Uberbukkit.getPVN() >= 8 ? 12.0F : 2F, 0);
     private final int f;
     private final int g;
     private final float h;

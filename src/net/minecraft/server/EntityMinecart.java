@@ -4,6 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 import java.util.List;
 
 // CraftBukkit start
@@ -750,13 +752,16 @@ public class EntityMinecart extends Entity implements IInventory {
                     d0 *= 0.5D;
                     d1 *= 0.5D;
                     if (entity instanceof EntityMinecart) {
-                        double d4 = entity.locX - this.locX;
-                        double d5 = entity.locZ - this.locZ;
-                        double d6 = d4 * entity.motZ + d5 * entity.lastX;
+                        // uberbukkit
+                        if (!PoseidonConfig.getInstance().getBoolean("version.mechanics.allow_minecart_boosters", false)) {
+                            double d4 = entity.locX - this.locX;
+                            double d5 = entity.locZ - this.locZ;
+                            double d6 = d4 * entity.motZ + d5 * entity.lastX;
 
-                        d6 *= d6;
-                        if (d6 > 5.0D) {
-                            return;
+                            d6 *= d6;
+                            if (d6 > 5.0D) {
+                                return;
+                            }
                         }
 
                         double d7 = entity.motX + this.motX;

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import java.util.Calendar;
 import java.util.Random;
+
+import com.legacyminecraft.poseidon.PoseidonConfig;
 
 public class ChunkProviderGenerate implements IChunkProvider {
 
@@ -178,7 +181,8 @@ public class ChunkProviderGenerate implements IChunkProvider {
                             } else if (j1 > 0) {
                                 --j1;
                                 abyte[l1] = b2;
-                                if (j1 == 0 && b2 == Block.SAND.id) {
+                                // uberbukkit
+                                if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_sandstone", true) && j1 == 0 && b2 == Block.SAND.id) {
                                     j1 = this.j.nextInt(4);
                                     b2 = (byte) Block.SANDSTONE.id;
                                 }
@@ -418,11 +422,14 @@ public class ChunkProviderGenerate implements IChunkProvider {
             (new WorldGenMinable(Block.DIAMOND_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
         }
 
-        for (k1 = 0; k1 < 1; ++k1) {
-            l1 = k + this.j.nextInt(16);
-            i2 = this.j.nextInt(16) + this.j.nextInt(16);
-            j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.LAPIS_ORE.id, 6)).a(this.p, this.j, l1, i2, j2);
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_lapis_ores", true)) {
+            for (k1 = 0; k1 < 1; ++k1) {
+                l1 = k + this.j.nextInt(16);
+                i2 = this.j.nextInt(16) + this.j.nextInt(16);
+                j2 = l + this.j.nextInt(16);
+                (new WorldGenMinable(Block.LAPIS_ORE.id, 6)).a(this.p, this.j, l1, i2, j2);
+            }
         }
 
         d0 = 0.5D;
@@ -460,12 +467,26 @@ public class ChunkProviderGenerate implements IChunkProvider {
             l1 -= 20;
         }
 
+        // uberbukkit
+        Object object = biomebase.a(this.j);
+        if (PoseidonConfig.getInstance().getBoolean("version.worldgen.pre_b1_2_ore_generation", false)) {
+            object = new WorldGenTrees();
+            if (this.j.nextInt(10) == 0) {
+                object = new WorldGenBigTree();
+            }
+
+            if (biomebase == BiomeBase.RAINFOREST && this.j.nextInt(3) == 0) {
+                object = new WorldGenBigTree();
+            }
+        }
+
         int k2;
 
         for (i2 = 0; i2 < l1; ++i2) {
             j2 = k + this.j.nextInt(16) + 8;
             k2 = l + this.j.nextInt(16) + 8;
-            WorldGenerator worldgenerator = biomebase.a(this.j);
+            // uberbukkit
+            WorldGenerator worldgenerator = (WorldGenerator) object;
 
             worldgenerator.a(1.0D, 1.0D, 1.0D);
             worldgenerator.a(this.p, this.j, j2, this.p.getHighestBlockYAt(j2, k2), k2);
@@ -524,17 +545,20 @@ public class ChunkProviderGenerate implements IChunkProvider {
         int j3;
         int k3;
 
-        for (k2 = 0; k2 < b1; ++k2) {
-            byte b2 = 1;
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_tallgrass", true)) {
+            for (k2 = 0; k2 < b1; ++k2) {
+                byte b2 = 1;
 
-            if (biomebase == BiomeBase.RAINFOREST && this.j.nextInt(3) != 0) {
-                b2 = 2;
+                if (biomebase == BiomeBase.RAINFOREST && this.j.nextInt(3) != 0) {
+                    b2 = 2;
+                }
+
+                l2 = k + this.j.nextInt(16) + 8;
+                k3 = this.j.nextInt(128);
+                j3 = l + this.j.nextInt(16) + 8;
+                (new WorldGenGrass(Block.LONG_GRASS.id, b2)).a(this.p, this.j, l2, k3, j3);
             }
-
-            l2 = k + this.j.nextInt(16) + 8;
-            k3 = this.j.nextInt(128);
-            j3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenGrass(Block.LONG_GRASS.id, b2)).a(this.p, this.j, l2, k3, j3);
         }
 
         b1 = 0;
@@ -542,11 +566,14 @@ public class ChunkProviderGenerate implements IChunkProvider {
             b1 = 2;
         }
 
-        for (k2 = 0; k2 < b1; ++k2) {
-            i3 = k + this.j.nextInt(16) + 8;
-            l2 = this.j.nextInt(128);
-            k3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenDeadBush(Block.DEAD_BUSH.id)).a(this.p, this.j, i3, l2, k3);
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_tallgrass", true)) {
+            for (k2 = 0; k2 < b1; ++k2) {
+                i3 = k + this.j.nextInt(16) + 8;
+                l2 = this.j.nextInt(128);
+                k3 = l + this.j.nextInt(16) + 8;
+                (new WorldGenDeadBush(Block.DEAD_BUSH.id)).a(this.p, this.j, i3, l2, k3);
+            }
         }
 
         if (this.j.nextInt(2) == 0) {
@@ -622,6 +649,17 @@ public class ChunkProviderGenerate implements IChunkProvider {
                 if (d1 < 0.5D && l3 > 0 && l3 < 128 && this.p.isEmpty(i3, l3, l2) && this.p.getMaterial(i3, l3 - 1, l2).isSolid() && this.p.getMaterial(i3, l3 - 1, l2) != Material.ICE) {
                     this.p.setTypeId(i3, l3, l2, Block.SNOW.id);
                 }
+            }
+        }
+
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_steveco_chests", false)) {
+            k2 = k + this.j.nextInt(16) + 8;
+            l2 = this.j.nextInt(128);
+            i3 = l + this.j.nextInt(16) + 8;
+            if (this.p.getTypeId(k2, l2, i3) == 0 && this.p.p(k2, l2 - 1, i3)) {
+                System.out.println("added a chest!!");
+                this.p.setTypeId(k2, l2, i3, Block.LOCKED_CHEST.id);
             }
         }
 

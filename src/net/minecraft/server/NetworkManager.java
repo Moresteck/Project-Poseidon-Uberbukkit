@@ -2,6 +2,9 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import org.bukkit.Bukkit;
 
 import java.io.BufferedOutputStream;
@@ -60,8 +63,15 @@ public class NetworkManager {
             if (PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)) {
                 socket.setTcpNoDelay(true);
             }
-            this.input = new DataInputStream(socket.getInputStream());
-            this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
+
+            // uberbukkit
+            if (Uberbukkit.getPVN() >= 11) {
+                this.input = new DataInputStream(socket.getInputStream());
+                this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
+            } else {
+                this.input = new DataInputStream(socket.getInputStream());
+                this.output = new DataOutputStream(socket.getOutputStream());
+            }
         } catch (java.io.IOException socketexception) {
             // CraftBukkit end
             System.err.println(socketexception.getMessage());
@@ -257,7 +267,7 @@ public class NetworkManager {
 
             //Poseidon End
 
-//            packet.a(this.p);
+            //            packet.a(this.p);
         }
 
         this.a();

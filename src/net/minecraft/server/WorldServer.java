@@ -5,6 +5,10 @@ import org.bukkit.craftbukkit.generator.*;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.generator.ChunkGenerator;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,11 +121,13 @@ public class WorldServer extends World implements BlockChangeDelegate {
         LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) entity.getBukkitEntity());
         this.getServer().getPluginManager().callEvent(lightning);
 
-        if (lightning.isCancelled()) {
+        // uberbukkit
+        if (lightning.isCancelled() || !PoseidonConfig.getInstance().getBoolean("version.mechanics.do_weather", true)) {
             return false;
         }
 
-        if (super.strikeLightning(entity)) {
+        // uberbukkit
+        if (super.strikeLightning(entity) && Uberbukkit.getProtocolHandler().canReceivePacket(71)) {
             this.server.serverConfigurationManager.sendPacketNearby(entity.locX, entity.locY, entity.locZ, 512.0D, this.dimension, new Packet71Weather(entity));
             // CraftBukkit end
             return true;
@@ -149,7 +155,7 @@ public class WorldServer extends World implements BlockChangeDelegate {
         explosion.a = flag;
         explosion.a();
         explosion.a(false);
-        */
+         */
         this.server.serverConfigurationManager.sendPacketNearby(d0, d1, d2, 64.0D, this.dimension, new Packet60Explosion(d0, d1, d2, f, explosion.blocks));
         // CraftBukkit end
         return explosion;
@@ -157,8 +163,11 @@ public class WorldServer extends World implements BlockChangeDelegate {
 
     public void playNote(int i, int j, int k, int l, int i1) {
         super.playNote(i, j, k, l, i1);
-        // CraftBukkit
-        this.server.serverConfigurationManager.sendPacketNearby((double) i, (double) j, (double) k, 64.0D, this.dimension, new Packet54PlayNoteBlock(i, j, k, l, i1));
+        // uberbukkit
+        if (Uberbukkit.getProtocolHandler().canReceivePacket(54)) {
+            // CraftBukkit
+            this.server.serverConfigurationManager.sendPacketNearby((double) i, (double) j, (double) k, 64.0D, this.dimension, new Packet54PlayNoteBlock(i, j, k, l, i1));
+        }
     }
 
     public void saveLevel() {
@@ -172,7 +181,8 @@ public class WorldServer extends World implements BlockChangeDelegate {
         if (flag != this.v()) {
             // CraftBukkit start - only sending weather packets to those affected
             for (int i = 0; i < this.players.size(); ++i) {
-                if (((EntityPlayer) this.players.get(i)).world == this) {
+                // uberbukkit
+                if (((EntityPlayer) this.players.get(i)).world == this && Uberbukkit.getProtocolHandler().canReceivePacket(70)) {
                     ((EntityPlayer) this.players.get(i)).netServerHandler.sendPacket(new Packet70Bed(flag ? 2 : 1));
                 }
             }

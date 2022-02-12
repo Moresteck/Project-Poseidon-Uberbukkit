@@ -15,7 +15,7 @@ public class ItemInWorldManager {
 
     private WorldServer world;
     public EntityHuman player;
-    private float c = 0.0F;
+    private int c = 0;
     private int lastDigTick;
     private int e;
     private int f;
@@ -27,9 +27,78 @@ public class ItemInWorldManager {
     private int l;
     private int m;
 
+    public double damageDealt;
+
     public ItemInWorldManager(WorldServer worldserver) {
         this.world = worldserver;
     }
+
+    // ======= UBERBUKKIT PRE-b1.3 AREA =======
+
+    public void oldClick(int i, int j, int k, int l) { // UberBukkit add block face
+        int i1 = this.world.getTypeId(i, j, k);
+        
+        // CraftBukkit start
+        PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_BLOCK, i, j, k, l, this.player.inventory.getItemInHand());
+
+        if (event.useInteractedBlock() == Event.Result.DENY) {
+            // If we denied a door from opening, we need to send a correcting update to the client, as it already opened the door.
+            if (i1 == Block.WOODEN_DOOR.id) {
+                // For some reason *BOTH* the bottom/top part have to be marked updated.
+                boolean bottom = (this.world.getData(i, j, k) & 8) == 0;
+                ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
+                ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j + (bottom ? 1 : -1), k, this.world));
+            } else if (i1 == Block.TRAP_DOOR.id) {
+                ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
+            }
+        } else {
+            if (i1 > 0 && this.damageDealt == 0.0F) {
+                Block.byId[i1].b(this.world, i, j, k, this.player);
+            }
+            // Allow fire punching to be blocked
+            this.world.douseFire((EntityHuman) null, i, j, k, l);
+        }
+        // CraftBukkit end
+
+        if (i1 > 0 && Block.byId[i1].getDamage(this.player) >= 1.0F) {
+            this.c(i, j, k);
+        }
+    }
+
+    public void oldHaltBreak() {
+        this.damageDealt = 0.0F;
+        this.c = 0;
+    }
+
+    public void oldDig(int i, int j, int k, int l) {
+        if (this.c > 0) {
+            --this.c;
+        } else {
+            if (i == this.e && j == this.f && k == this.g) {
+                int i1 = this.world.getTypeId(i, j, k);
+
+                if (i1 == 0) {
+                    return;
+                }
+
+                Block block = Block.byId[i1];
+
+                this.damageDealt += block.getDamage(this.player);
+                if (this.damageDealt >= 1.0F) {
+                    this.c(i, j, k);
+                    this.damageDealt = 0.0F;
+                    this.c = 5;
+                }
+            } else {
+                this.damageDealt = 0.0F;
+                this.e = i;
+                this.f = j;
+                this.g = k;
+            }
+        }
+    }
+
+    // ======= END =======
 
     public void a() {
         this.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
@@ -134,8 +203,6 @@ public class ItemInWorldManager {
             ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
             // CraftBukkit end
         }
-
-        this.c = 0.0F;
     }
 
     public boolean b(int i, int j, int k) {

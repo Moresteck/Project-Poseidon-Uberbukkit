@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.BiomeBase;
 import net.minecraft.server.BlockRedstoneWire;
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -72,6 +74,11 @@ public class CraftBlock implements Block {
     }
 
     public boolean setTypeId(final int type) {
+    	// uberbukkit
+    	if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(type)) {
+    		return false;
+    	}
+
         return chunk.getHandle().world.setTypeId(x, y, z, type);
     }
 
@@ -79,11 +86,21 @@ public class CraftBlock implements Block {
         if (applyPhysics) {
             return setTypeId(type);
         } else {
+        	// uberbukkit
+        	if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(type)) {
+        		return false;
+        	}
+
             return chunk.getHandle().world.setRawTypeId(x, y, z, type);
         }
     }
 
     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
+    	// uberbukkit
+    	if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(type)) {
+    		return false;
+    	}
+
         if (applyPhysics) {
             return chunk.getHandle().world.setTypeIdAndData(x, y, z, type, data);
         } else {

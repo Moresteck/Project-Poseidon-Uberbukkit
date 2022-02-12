@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class Packet8UpdateHealth extends Packet {
 
     public int a;
@@ -15,11 +17,19 @@ public class Packet8UpdateHealth extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readShort();
+        if (Uberbukkit.getPVN() >= 7) {
+            this.a = datainputstream.readShort();
+        } else {
+            this.a = datainputstream.readByte();
+        }
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeShort(this.a);
+        if (Uberbukkit.getPVN() >= 7) {
+            dataoutputstream.writeShort(this.a);
+        } else {
+            dataoutputstream.writeByte(this.a);
+        }
     }
 
     public void a(NetHandler nethandler) {
@@ -27,6 +37,6 @@ public class Packet8UpdateHealth extends Packet {
     }
 
     public int a() {
-        return 2;
+        return Uberbukkit.getPVN() >= 7 ? 2 : 1;
     }
 }

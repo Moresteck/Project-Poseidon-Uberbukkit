@@ -1,6 +1,18 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -17,7 +29,9 @@ import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.generator.ChunkGenerator;
 
-import java.util.*;
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
 
 // CraftBukkit start
 // CraftBukkit end
@@ -280,6 +294,11 @@ public class World implements IBlockAccess {
     // CraftBukkit end
 
     public boolean setRawTypeIdAndData(int i, int j, int k, int l, int i1) {
+        // uberbukkit
+        if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(l)) {
+            return false;
+        }
+
         if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
             if (j < 0) {
                 return false;
@@ -296,6 +315,11 @@ public class World implements IBlockAccess {
     }
 
     public boolean setRawTypeId(int i, int j, int k, int l) {
+        // uberbukkit
+        if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(l)) {
+            return false;
+        }
+
         if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
             if (j < 0) {
                 return false;
@@ -479,8 +503,13 @@ public class World implements IBlockAccess {
         if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
             if (flag) {
                 int l = this.getTypeId(i, j, k);
+                
+                boolean check = false;
+                if (Uberbukkit.getPVN() >= 12) {
+                    check = l == Block.COBBLESTONE_STAIRS.id || l == Block.WOOD_STAIRS.id;
+                }
 
-                if (l == Block.STEP.id || l == Block.SOIL.id || l == Block.COBBLESTONE_STAIRS.id || l == Block.WOOD_STAIRS.id) {
+                if (l == Block.STEP.id || l == Block.SOIL.id || check) {
                     int i1 = this.a(i, j + 1, k, false);
                     int j1 = this.a(i + 1, j, k, false);
                     int k1 = this.a(i - 1, j, k, false);
@@ -1726,7 +1755,13 @@ public class World implements IBlockAccess {
             this.save(false, (IProgressUpdate) null);
         }
 
-        this.worldData.a(i);
+        // uberbukkit
+        if (this.worldProvider instanceof WorldProviderHell && Uberbukkit.getPVN() < 12) {
+            this.worldData.a(18000);
+        } else {
+            this.worldData.a(i);
+        }
+
         this.a(false);
         this.j();
     }
@@ -1934,16 +1969,19 @@ public class World implements IBlockAccess {
                         // CraftBukkit end
                     }
 
-                    // CraftBukkit start
-                        if (l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
-                            BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
-                            blockState.setTypeId(Block.ICE.id);
+                    // uberbukkit
+                    boolean blocked = PoseidonConfig.getInstance().getBoolean("version.mechanics.ice_generate_only_when_snowing", false) && !this.v();
 
-                            BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
-                            this.getServer().getPluginManager().callEvent(iceBlockForm);
-                            if (!iceBlockForm.isCancelled()) {
-                                blockState.update(true);
-                            }
+                    // CraftBukkit start
+                    if (!blocked && l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
+                        BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
+                        blockState.setTypeId(Block.ICE.id);
+
+                        BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
+                        this.getServer().getPluginManager().callEvent(iceBlockForm);
+                        if (!iceBlockForm.isCancelled()) {
+                            blockState.update(true);
+                        }
                     }
                     // CraftBukkit end
                 }
@@ -2388,7 +2426,11 @@ public class World implements IBlockAccess {
     }
 
     public boolean v() {
-        return (double) this.d(1.0F) > 0.2D;
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.mechanics.do_weather", true))
+            return (double) this.d(1.0F) > 0.2D;
+
+    	return false;
     }
 
     public boolean s(int i, int j, int k) {

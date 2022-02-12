@@ -7,6 +7,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 import java.util.List;
 
 // CraftBukkit start
@@ -293,6 +295,14 @@ public class EntityArrow extends Entity {
 
     public void b(EntityHuman entityhuman) {
         if (!this.world.isStatic) {
+
+            // uberbukkit
+            if (!PoseidonConfig.getInstance().getBoolean("version.mechanics.arrows_pickup_by_others", true)) {
+                if (this.shooter != entityhuman) {
+                    return;
+                }
+            }
+
             // CraftBukkit start
             ItemStack itemstack = new ItemStack(Item.ARROW, 1);
             if (this.inGround && this.fromPlayer && this.shake <= 0 && entityhuman.inventory.canHold(itemstack) > 0) {

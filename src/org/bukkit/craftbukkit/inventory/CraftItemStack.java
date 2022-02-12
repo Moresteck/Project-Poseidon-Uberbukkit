@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.inventory;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class CraftItemStack extends ItemStack {
     protected net.minecraft.server.ItemStack item;
 
@@ -67,6 +69,11 @@ public class CraftItemStack extends ItemStack {
 
     @Override
     public void setTypeId(int type) {
+    	// uberbukkit
+    	if (!Uberbukkit.getProtocolHandler().canReceiveBlockItem(type)) {
+    		return;
+    	}
+
         if (type == 0) {
             super.setTypeId(0);
             super.setAmount(0);

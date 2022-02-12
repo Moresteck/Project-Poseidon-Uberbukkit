@@ -3,6 +3,8 @@ package net.minecraft.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class FurnaceRecipes {
 
     private static final FurnaceRecipes a = new FurnaceRecipes();
@@ -21,8 +23,11 @@ public class FurnaceRecipes {
         this.registerRecipe(Item.RAW_FISH.id, new ItemStack(Item.COOKED_FISH));
         this.registerRecipe(Block.COBBLESTONE.id, new ItemStack(Block.STONE));
         this.registerRecipe(Item.CLAY_BALL.id, new ItemStack(Item.CLAY_BRICK));
-        this.registerRecipe(Block.CACTUS.id, new ItemStack(Item.INK_SACK, 1, 2));
-        this.registerRecipe(Block.LOG.id, new ItemStack(Item.COAL, 1, 1));
+
+        if (Uberbukkit.getPVN() >= 8) {
+            this.registerRecipe(Block.LOG.id, new ItemStack(Item.COAL, 1, 1));
+            this.registerRecipe(Block.CACTUS.id, new ItemStack(Item.INK_SACK, 1, 2));
+        }
     }
 
     public void registerRecipe(int i, ItemStack itemstack) {

@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import java.util.Random;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 public class WorldGenDungeons extends WorldGenerator {
 
     public WorldGenDungeons() {}
@@ -123,7 +125,45 @@ public class WorldGenDungeons extends WorldGenerator {
     private ItemStack a(Random random) {
         int i = random.nextInt(11);
 
-        return i == 0 ? new ItemStack(Item.SADDLE) : (i == 1 ? new ItemStack(Item.IRON_INGOT, random.nextInt(4) + 1) : (i == 2 ? new ItemStack(Item.BREAD) : (i == 3 ? new ItemStack(Item.WHEAT, random.nextInt(4) + 1) : (i == 4 ? new ItemStack(Item.SULPHUR, random.nextInt(4) + 1) : (i == 5 ? new ItemStack(Item.STRING, random.nextInt(4) + 1) : (i == 6 ? new ItemStack(Item.BUCKET) : (i == 7 && random.nextInt(100) == 0 ? new ItemStack(Item.GOLDEN_APPLE) : (i == 8 && random.nextInt(2) == 0 ? new ItemStack(Item.REDSTONE, random.nextInt(4) + 1) : (i == 9 && random.nextInt(10) == 0 ? new ItemStack(Item.byId[Item.GOLD_RECORD.id + random.nextInt(2)]) : (i == 10 ? new ItemStack(Item.INK_SACK, 1, 3) : null))))))))));
+        switch (i) {
+        case 0:
+            return new ItemStack(Item.SADDLE);
+        case 1:
+            return new ItemStack(Item.IRON_INGOT, random.nextInt(4) + 1);
+        case 2:
+            new ItemStack(Item.BREAD);
+        case 3:
+            new ItemStack(Item.WHEAT, random.nextInt(4) + 1);
+        case 4:
+            new ItemStack(Item.SULPHUR, random.nextInt(4) + 1);
+        case 5:
+            new ItemStack(Item.STRING, random.nextInt(4) + 1);
+        case 6:
+            new ItemStack(Item.BUCKET);
+        case 7: {
+            if (random.nextInt(100) == 0) {
+                return new ItemStack(Item.GOLDEN_APPLE);
+            }
+        }
+        case 8: {
+            if (random.nextInt(2) == 0) {
+                return new ItemStack(Item.REDSTONE, random.nextInt(4) + 1);
+            }
+        }
+        case 9: {
+            if (random.nextInt(10) == 0) {
+                return new ItemStack(Item.byId[Item.GOLD_RECORD.id + random.nextInt(2)]);
+            }
+        }
+        case 10: {
+            // uberbukkit
+            if (PoseidonConfig.getInstance().getBoolean("version.worldgen.cocoabeans_loot", true)) {
+                return new ItemStack(Item.INK_SACK, 1, 3);
+            }
+        }
+        default:
+            return null;
+        }
     }
 
     private String b(Random random) {

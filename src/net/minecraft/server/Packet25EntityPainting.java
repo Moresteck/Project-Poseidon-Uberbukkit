@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 public class Packet25EntityPainting extends Packet {
 
     public int a;
@@ -26,7 +28,13 @@ public class Packet25EntityPainting extends Packet {
 
     public void a(DataInputStream datainputstream) throws IOException {
         this.a = datainputstream.readInt();
-        this.f = a(datainputstream, EnumArt.z);
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 11) {
+            this.f = a(datainputstream, EnumArt.z);
+        } else {
+            this.f = datainputstream.readUTF();
+        }
+
         this.b = datainputstream.readInt();
         this.c = datainputstream.readInt();
         this.d = datainputstream.readInt();
@@ -35,7 +43,13 @@ public class Packet25EntityPainting extends Packet {
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
         dataoutputstream.writeInt(this.a);
-        a(this.f, dataoutputstream);
+        // uberbukkit
+        if (Uberbukkit.getPVN() >= 11) {
+            a(this.f, dataoutputstream);
+        } else {
+            dataoutputstream.writeUTF(this.f);
+        }
+
         dataoutputstream.writeInt(this.b);
         dataoutputstream.writeInt(this.c);
         dataoutputstream.writeInt(this.d);

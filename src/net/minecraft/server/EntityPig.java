@@ -2,6 +2,9 @@ package net.minecraft.server;
 
 // CraftBukkit start
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 import org.bukkit.event.entity.PigZapEvent;
 // CraftBukkit end
 
@@ -49,7 +52,12 @@ public class EntityPig extends EntityAnimal {
     }
 
     protected int j() {
-        return this.fireTicks > 0 ? Item.GRILLED_PORK.id : Item.PORK.id;
+        // uberbukkit
+        if (PoseidonConfig.getInstance().getBoolean("version.mechanics.burning_pig_drop_cooked_meat", true) && this.fireTicks > 0) {
+            return Item.GRILLED_PORK.id;
+        } else {
+            return Item.PORK.id;
+        }
     }
 
     public boolean hasSaddle() {
@@ -78,7 +86,7 @@ public class EntityPig extends EntityAnimal {
             // CraftBukkit end
 
             entitypigzombie.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
-             // CraftBukkit - added a reason for spawning this creature
+            // CraftBukkit - added a reason for spawning this creature
             this.world.addEntity(entitypigzombie, SpawnReason.LIGHTNING);
             this.die();
         }

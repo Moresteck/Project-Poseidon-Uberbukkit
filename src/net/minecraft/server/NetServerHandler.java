@@ -1,8 +1,10 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
-import com.projectposeidon.ConnectionType;
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,18 +15,33 @@ import org.bukkit.craftbukkit.TextWrapper;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.Event;
+import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.packet.PacketReceivedEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
+import com.projectposeidon.ConnectionType;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
+import pl.moresteck.uberbukkit.protocol.Protocol;
 
 // CraftBukkit start
 // CraftBukkit end
@@ -123,6 +140,11 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
     // CraftBukkit end
 
+    // uberbukkit
+    public Integer lastDigX = null;
+    public Integer lastDigY = null;
+    public Integer lastDigZ = null;
+    
     public void a() {
         this.i = false;
         this.networkManager.b();
@@ -159,6 +181,14 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         this.minecraftServer.serverConfigurationManager.disconnect(this.player);
         this.disconnected = true;
+    }
+
+    // uberbukkit
+    public void a(Packet5EntityEquipment packet5) {
+        if (Uberbukkit.getPVN() > 6) return;
+
+        System.out.println("PACKET 5 received");
+        this.player.packet5.process(packet5);
     }
 
     public void a(Packet27 packet27) {
@@ -213,6 +243,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
 
         if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
+            this.player.isInWorkbench = false; // uberbukkit - cancel workbench status when player moves
             this.lastPosX = to.getX();
             this.lastPosY = to.getY();
             this.lastPosZ = to.getZ();
@@ -464,6 +495,44 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         this.player.netServerHandler.sendPacket(new Packet13PlayerLookMove(d0, d1 + 1.6200000047683716D, d1, d2, f, f1, false));
     }
 
+    // uberbukkit
+    public void a(Packet21PickupSpawn packet21) {
+        // copy from craftbukkit
+        if (this.lastDropTick != MinecraftServer.currentTick) {
+            this.dropCount = 0;
+            this.lastDropTick = MinecraftServer.currentTick;
+        } else {
+            // Else we increment the drop count and check the amount.
+            this.dropCount++;
+            if (this.dropCount >= 20) {
+                a.warning(this.player.name + " dropped their items too quickly!");
+                this.disconnect("You dropped your items too quickly (Hacking?)");
+            }
+        }
+        // drop itemstack
+        ItemStack hand = this.player.inventory.items[this.player.inventory.itemInHandIndex];
+        ItemStack todrop = null;
+
+        if (hand != null && hand.id == packet21.h && hand.count >= packet21.i && packet21.i == 1) {
+            todrop = hand.cloneItemStack();
+            todrop.count = packet21.i;
+            hand.count -= packet21.i;
+        } else {
+            ArrayList<ItemStack> list = this.player.packet5.queue.getQueue();
+            for (ItemStack stack : list) {
+                if (stack.id == packet21.h && stack.count >= packet21.i) {
+                    todrop = stack.cloneItemStack();
+                    todrop.count = packet21.i;
+                    this.player.packet5.queue.removeStackFromQueue(todrop);
+                    break;
+                }
+            }
+        }
+        this.player.a(todrop, false);
+        //this.player.F();
+    }
+
+    public long lastDigTick = -1;
     public void a(Packet14BlockDig packet14blockdig) {
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet14blockdig);
@@ -472,6 +541,11 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             return;
 
         if (this.player.dead) return; // CraftBukkit
+//        if (packet14blockdig.e == 0 || packet14blockdig.e == 2 || packet14blockdig.e == 3) {
+//            System.out.println("PACKET14: " + packet14blockdig.e + " (" + (System.nanoTime() - lastDigTick) + ")");
+//            System.out.println(packet14blockdig.a + ", " + packet14blockdig.b + ", " + packet14blockdig.c);
+//            lastDigTick = System.nanoTime();
+//        }
 
         WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
 
@@ -495,17 +569,32 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             boolean flag = worldserver.weirdIsOpCache = worldserver.dimension != 0 || this.minecraftServer.serverConfigurationManager.isOp(this.player.name); // CraftBukkit
             boolean flag1 = false;
 
+            // uberbukkit
+
+            // Pre-b1.3 block handling
+            // e == 2 is stop digging (holds no block coordinate data)
+            // e == 3 is expected block break from client
+            // e == 1 is digging
+            // e == 0 is start digging, or digging every 5 packets (notch is weird)
+
+            // Post-b1.2_01 block handling
+            // e == 2 is stop digging
+            // e == 0 is start digging
+            Integer i = packet14blockdig.a;
+            Integer j = packet14blockdig.b;
+            Integer k = packet14blockdig.c;
+
             if (packet14blockdig.e == 0) {
                 flag1 = true;
             }
 
-            if (packet14blockdig.e == 2) {
+            if (packet14blockdig.e == 1 && Uberbukkit.getPVN() <= 8) {
                 flag1 = true;
             }
 
-            int i = packet14blockdig.a;
-            int j = packet14blockdig.b;
-            int k = packet14blockdig.c;
+            if (packet14blockdig.e == 2 && Uberbukkit.getPVN() >= 9) {
+                flag1 = true;
+            }
 
             if (flag1) {
                 double d0 = this.player.locX - ((double) i + 0.5D);
@@ -526,35 +615,130 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 i1 = l;
             }
 
-            if (packet14blockdig.e == 0) {
-                // CraftBukkit
-                if (i1 < this.server.getSpawnRadius() && !flag) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-                } else {
-                    // CraftBukkit - add face argument
-                    this.player.itemInWorldManager.dig(i, j, k, packet14blockdig.face);
+            if (Uberbukkit.getPVN() <= 8) {
+                // CraftBukkit start
+                CraftPlayer player = getPlayer();
+                CraftBlock block = (CraftBlock) player.getWorld().getBlockAt(i, j, k);
+                int blockId = block.getTypeId();
+                float damage = 0;
+                if (Block.byId[blockId] != null) {
+                    damage = Block.byId[blockId].getDamage(player.getHandle()); //Get amount of damage going to block
                 }
-            } else if (packet14blockdig.e == 2) {
-                this.player.itemInWorldManager.a(i, j, k);
-                if (worldserver.getTypeId(i, j, k) != 0) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-                }
-            } else if (packet14blockdig.e == 3) {
-                double d4 = this.player.locX - ((double) i + 0.5D);
-                double d5 = this.player.locY - ((double) j + 0.5D);
-                double d6 = this.player.locZ - ((double) k + 0.5D);
-                double d7 = d4 * d4 + d5 * d5 + d6 * d6;
+                // CraftBukkit end
 
-                if (d7 < 256.0D) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
+                if (packet14blockdig.e == 0) {
+                    // CraftBukkit start
+                    if (i1 > this.server.getSpawnRadius() || flag) {
+                        if (blockId > 0) {
+                            BlockDamageEvent breakEvent;
+                            // If the amount of damage that the player is going to do to the block
+                            // is >= 1, then the block is going to break (eg, flowers, torches)
+                            if (damage >= 1.0F) {
+                                // if we are destroying either a redstone wire with a current greater than 0 or
+                                // a redstone torch that is on, then we should notify plugins that this block has
+                                // returned to a current value of 0 (since it will once the redstone is destroyed)
+                                if ((blockId == Block.REDSTONE_WIRE.id && block.getData() > 0) || blockId == Block.REDSTONE_TORCH_ON.id) {
+                                    server.getPluginManager().callEvent( new BlockRedstoneEvent(block, (blockId == Block.REDSTONE_WIRE.id ? block.getData() : 15), 0));
+                                }
+                                breakEvent = new BlockDamageEvent(player, block, player.getItemInHand(), true);
+                            } else {
+                                breakEvent = new BlockDamageEvent(player, block, player.getItemInHand(), false);
+                            }
+                            server.getPluginManager().callEvent(breakEvent);
+                            if (!breakEvent.isCancelled()) {
+                                this.player.itemInWorldManager.oldClick(i, j, k, packet14blockdig.face);
+                            }
+                        }
+                    }
+                    // CraftBukkit end
+                } else if (packet14blockdig.e == 2) {
+                    // CraftBukkit start - Get last block that the player hit
+                    // Otherwise the block is a Bedrock @(0,0,0)
+                    block = (CraftBlock) player.getWorld().getBlockAt(lastDigX, lastDigY, lastDigZ);
+                    BlockDamageEvent breakEvent = new BlockDamageEvent(player, block, player.getItemInHand(), damage >= 1.0F);
+                    server.getPluginManager().callEvent(breakEvent);
+                    if (!breakEvent.isCancelled()) {
+                        this.player.itemInWorldManager.oldHaltBreak();
+                    }
+                    // CraftBukkit end
+                } else if (packet14blockdig.e == 1) {
+                    // CraftBukkit start
+                    if (i1 > this.server.getSpawnRadius() || flag) {
+                        BlockDamageEvent breakEvent;
+                        // If the amount of damage going to the block plus the current amount
+                        // of damage is greater than 1, the block is going to break.
+                        if (this.player.itemInWorldManager.damageDealt + damage  >= 1.0F) {
+                            // if we are destroying either a redstone wire with a current greater than 0 or
+                            // a redstone torch that is on, then we should notify plugins that this block has
+                            // returned to a current value of 0 (since it will once the redstone is destroyed)
+                            if ((blockId == Block.REDSTONE_WIRE.id && block.getData() > 0) || blockId == Block.REDSTONE_TORCH_ON.id) {
+                                server.getPluginManager().callEvent( new BlockRedstoneEvent(block, (blockId == Block.REDSTONE_WIRE.id ? block.getData() : 15), 0));
+                            }
+                            breakEvent = new BlockDamageEvent(player, block, player.getItemInHand(), damage >= 1.0F);
+                        } else {
+                            breakEvent = new BlockDamageEvent(player, block, player.getItemInHand(), damage >= 1.0F);
+                        }
+                        server.getPluginManager().callEvent(breakEvent);
+                        if (!breakEvent.isCancelled()) {
+                            this.player.itemInWorldManager.oldDig(i, j, k, l);
+                        } else {
+                            this.player.itemInWorldManager.damageDealt = 0; // Reset the amount of damage if stopping break.
+                        }
+                    }
+                    // CraftBukkit end
+                } else if (packet14blockdig.e == 3) {
+                    double d5 = this.player.locX - ((double) i + 0.5D);
+                    double d6 = this.player.locY - ((double) j + 0.5D);
+                    double d7 = this.player.locZ - ((double) k + 0.5D);
+                    double d8 = d5 * d5 + d6 * d6 + d7 * d7;
+
+                    if (d8 < 256.0D) {
+                        this.player.netServerHandler.sendPacket((Packet) (new Packet53BlockChange(i, j, k, this.player.world))); // Craftbukkit
+                    }
+                }
+            } else {
+                if (packet14blockdig.e == 0) {
+                    // CraftBukkit
+                    if (i1 < this.server.getSpawnRadius() && !flag) {
+                        this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
+                    } else {
+                        // CraftBukkit - add face argument
+                        this.player.itemInWorldManager.dig(i, j, k, packet14blockdig.face);
+                    }
+                } else if (packet14blockdig.e == 2) {
+                    // uberbukkit - swapped i,j,k for lastDigX,lastDigY,lastDigZ
+                    this.player.itemInWorldManager.a(lastDigX, lastDigY, lastDigZ);
+                    if (worldserver.getTypeId(lastDigX, lastDigY, lastDigZ) != 0) {
+                        this.player.netServerHandler.sendPacket(new Packet53BlockChange(lastDigX, lastDigY, lastDigZ, worldserver));
+                    }
+                } else if (packet14blockdig.e == 3) {
+                    double d4 = this.player.locX - ((double) i + 0.5D);
+                    double d5 = this.player.locY - ((double) j + 0.5D);
+                    double d6 = this.player.locZ - ((double) k + 0.5D);
+                    double d7 = d4 * d4 + d5 * d5 + d6 * d6;
+
+                    if (d7 < 256.0D) {
+                        this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
+                    }
                 }
             }
+
+            // uberbukkit - reset last positions when stops digging
+            lastDigX = i;
+            lastDigY = j;
+            lastDigZ = k;
 
             worldserver.weirdIsOpCache = false;
         }
     }
 
     public void a(Packet15Place packet15place) {
+//        System.out.println("Packet15 received");
+//        System.out.println("a: " + packet15place.a);
+//        System.out.println("b: " + packet15place.b);
+//        System.out.println("c: " + packet15place.c);
+//        System.out.println("face: " + packet15place.face);
+//        System.out.println("data: " + packet15place.data);
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet15place);
         server.getPluginManager().callEvent(pevent);
@@ -565,6 +749,13 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         // CraftBukkit start
         if (this.player.dead) return;
+
+        // uberbukkit: noptch what the fuck have you done
+        if (Uberbukkit.getPVN() == 7) {
+            if (packet15place.itemstack != null && packet15place.a != -1 && packet15place.b != 255 && packet15place.c != -1 && (packet15place.itemstack.id == Item.BUCKET.id || packet15place.itemstack.id == Item.WATER_BUCKET.id || packet15place.itemstack.id == Item.LAVA_BUCKET.id || packet15place.itemstack.id == Item.MILK_BUCKET.id)) {
+                return;
+            }
+        }
 
         // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
         // aimed at a block. We shouldn't need to get the second packet if the data is handled
@@ -677,10 +868,21 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         this.player.h = false;
         // CraftBukkit
         if (!ItemStack.equals(this.player.inventory.getItemInHand(), packet15place.itemstack) || always) {
-            this.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, slot.a, this.player.inventory.getItemInHand()));
+            if (Uberbukkit.getPVN() <= 6) {
+                this.refreshInventory();
+            } else {
+                this.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, slot.a, this.player.inventory.getItemInHand()));
+            }
         }
 
         worldserver.weirdIsOpCache = false;
+    }
+
+    // uberbukkit
+    public void refreshInventory() {
+        this.sendPacket(new Packet5EntityEquipment(-1, this.player.inventory.items));
+        this.sendPacket(new Packet5EntityEquipment(-2, this.player.inventory.craft));
+        this.sendPacket(new Packet5EntityEquipment(-3, this.player.inventory.armor));
     }
 
     public void a(String s, Object[] aobject) {
@@ -719,13 +921,41 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         //Poseidon End
 
 
+        // uberbukkit
+        Protocol protocol = Uberbukkit.getProtocolHandler();
+        if (!protocol.canReceivePacket(packet.b())) {
+            this.g = this.f;
+            return;
+        }
+
+        // try to disallow for incompatible blocks
+        if (packet instanceof Packet5EntityEquipment) {
+            Packet5EntityEquipment packet5 = (Packet5EntityEquipment) packet;
+            if (packet5.c > 0 && !protocol.canReceiveBlockItem(packet5.c)) {
+                packet5.c = -1;
+                packet5.d = 0;
+            }
+        } else if (packet instanceof Packet53BlockChange) {
+            Packet53BlockChange packet53 = (Packet53BlockChange) packet;
+            if (!protocol.canReceiveBlockItem(packet53.material)) {
+                packet53.material = 1;
+            }
+        }
         // CraftBukkit start
-        if (packet instanceof Packet6SpawnPosition) {
+        else if (packet instanceof Packet6SpawnPosition) {
             Packet6SpawnPosition packet6 = (Packet6SpawnPosition) packet;
             this.player.compassTarget = new Location(this.getPlayer().getWorld(), packet6.x, packet6.y, packet6.z);
         } else if (packet instanceof Packet3Chat) {
             String message = ((Packet3Chat) packet).message;
-            for (final String line : TextWrapper.wrapText(message)) {
+            // uberbukkit
+            String[] wrapped = null;
+            if (Uberbukkit.getPVN() >= 9) { // TODO check compatibility
+                wrapped = TextWrapper.wrapText(message);
+            } else {
+                wrapped = TextWrapper.wrapTextLegacy(message);
+            }
+
+            for (final String line : wrapped) {
                 this.networkManager.queue(new Packet3Chat(line));
             }
             packet = null;
@@ -749,15 +979,27 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         if (this.player.dead) return; // CraftBukkit
 
-        if (packet16blockitemswitch.itemInHandIndex >= 0 && packet16blockitemswitch.itemInHandIndex <= InventoryPlayer.e()) {
-            // CraftBukkit start
-            PlayerItemHeldEvent event = new PlayerItemHeldEvent(this.getPlayer(), this.player.inventory.itemInHandIndex, packet16blockitemswitch.itemInHandIndex);
-            this.server.getPluginManager().callEvent(event);
-            // CraftBukkit end
+        if (Uberbukkit.getPVN() >= 7) {
+            if (packet16blockitemswitch.itemInHandIndex >= 0 && packet16blockitemswitch.itemInHandIndex <= InventoryPlayer.e()) {
+                // CraftBukkit start
+                PlayerItemHeldEvent event = new PlayerItemHeldEvent(this.getPlayer(), this.player.inventory.itemInHandIndex, packet16blockitemswitch.itemInHandIndex);
+                this.server.getPluginManager().callEvent(event);
+                // CraftBukkit end
 
-            this.player.inventory.itemInHandIndex = packet16blockitemswitch.itemInHandIndex;
+                this.player.inventory.itemInHandIndex = packet16blockitemswitch.itemInHandIndex;
+            } else {
+                a.warning(this.player.name + " tried to set an invalid carried item");
+            }
         } else {
-            a.warning(this.player.name + " tried to set an invalid carried item");
+
+            for (int i = 0; i < 9; i++) {
+                ItemStack stack = this.player.inventory.items[i];
+
+                if ((stack != null && stack.id == packet16blockitemswitch.itemId) ||
+                        (stack == null && packet16blockitemswitch.itemId == 0)) {
+                    this.player.inventory.itemInHandIndex = i;
+                }
+            }
         }
     }
 
@@ -828,7 +1070,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             if (this.server.dispatchCommand(player, s.substring(1))) {
                 //Project Poseidon Start
                 //Basic XAuth & Authme Firewall
-                if (s.toLowerCase().startsWith("/register") || s.toLowerCase().startsWith("/login") || s.toLowerCase().startsWith("/changepw") || s.toLowerCase().startsWith("/changepassword") || s.toLowerCase().startsWith("/unregister")) {
+                if (s.toLowerCase().startsWith("/register") || s.toLowerCase().startsWith("/login") || s.toLowerCase().startsWith("/l ") || s.toLowerCase().startsWith("/changepw") || s.toLowerCase().startsWith("/changepassword") || s.toLowerCase().startsWith("/unregister")) {
                     a.info(player.getName() + " issued server command: COMMAND REDACTED");
                 } else {
                     a.info(player.getName() + " issued server command: " + s);
@@ -885,7 +1127,18 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         if (pevent.isCancelled())
             return;
 
-        if (this.player.dead) return; // CraftBukkit
+        // CraftBukkit start
+        if (this.player.dead) return;
+
+        if (packet18armanimation.b == 104 || packet18armanimation.b == 105) {
+            PlayerToggleSneakEvent event = new PlayerToggleSneakEvent(this.getPlayer(), packet18armanimation.b == 104);
+            this.server.getPluginManager().callEvent(event);
+
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+        // CraftBukkit end
 
         if (packet18armanimation.b == 1) {
             // CraftBukkit start - raytrace to look for 'rogue armswings'
@@ -919,6 +1172,11 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             // CraftBukkit end
 
             this.player.w();
+            // uberbukkit
+        } else if (packet18armanimation.b == 104) {
+            this.player.setSneak(true);
+        } else if (packet18armanimation.b == 105) {
+            this.player.setSneak(false);
         }
     }
 
@@ -963,6 +1221,19 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         if (event.isCancelled())
             return;
 
+        // uberbukkit - drop item queue on disconnect
+        if (Uberbukkit.getPVN() <= 6) {
+            ArrayList<ItemStack> queue = this.player.packet5.queue.dropAllQueue();
+            Player bukkitEntity = (Player) this.player.getBukkitEntity();
+            for (ItemStack item : queue) {
+                System.out.println("Drop queue id: " + item.id + ", dmg: " + item.damage + ", cnt: " + item.count);
+                HashMap<Integer, org.bukkit.inventory.ItemStack> map = bukkitEntity.getInventory().addItem(new CraftItemStack(item));
+                // drop what couldn't fit in the inventory
+                for (org.bukkit.inventory.ItemStack stack : map.values()) {
+                    bukkitEntity.getWorld().dropItemNaturally(bukkitEntity.getLocation(), stack);
+                }
+            }
+        }
         this.networkManager.a("disconnect.quitting", new Object[0]);
     }
 

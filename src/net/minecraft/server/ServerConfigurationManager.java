@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+
+import pl.moresteck.uberbukkit.Uberbukkit;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
@@ -143,19 +146,19 @@ public class ServerConfigurationManager {
         // CraftBukkit end
 
         //Project POSEIDON Start
-//        boolean found = false;
-//        for (int i = 0; i < this.players.size(); ++i) {
-//            EntityPlayer ep = (EntityPlayer) this.players.get(i);
-//            if (entityplayer.name.equalsIgnoreCase(ep.name)) {
-//                found = true;
-//                break;
-//            }
-//        }
-//        if (!found) {
-//            //return null; - This caused a bug which could block future connections if a quit event occurs before a join event, i think
-//            playerQuitEvent.setQuitMessage(null);
-//        }
-//        PlayerTracker.getInstance().removePlayer(entityplayer.name);
+        //        boolean found = false;
+        //        for (int i = 0; i < this.players.size(); ++i) {
+        //            EntityPlayer ep = (EntityPlayer) this.players.get(i);
+        //            if (entityplayer.name.equalsIgnoreCase(ep.name)) {
+        //                found = true;
+        //                break;
+        //            }
+        //        }
+        //        if (!found) {
+        //            //return null; - This caused a bug which could block future connections if a quit event occurs before a join event, i think
+        //            playerQuitEvent.setQuitMessage(null);
+        //        }
+        //        PlayerTracker.getInstance().removePlayer(entityplayer.name);
         //Project POSEIDON End
 
         this.playerFileData.a(entityplayer);
@@ -171,7 +174,7 @@ public class ServerConfigurationManager {
         // Instead of kicking then returning, we need to store the kick reason
         // in the event, check with plugins to see if it's ok, and THEN kick
         // depending on the outcome. Also change any reference to this.e.c to entity.world
-        EntityPlayer entity = new EntityPlayer(this.server, this.server.getWorldServer(0), s, new ItemInWorldManager(this.server.getWorldServer(0)));
+        EntityPlayer entity = new EntityPlayer(this.server, this.server.getWorldServer(0), s, new ItemInWorldManager(this.server.getWorldServer(0)), netloginhandler.pvn);
         Player player = (entity == null) ? null : (Player) entity.getBukkitEntity();
         PlayerLoginEvent event = new PlayerLoginEvent(player, netloginhandler); //Project Poseidon - pass player IP through
 
@@ -237,7 +240,10 @@ public class ServerConfigurationManager {
                     isBedSpawn = true;
                     location = new Location(cworld, chunkcoordinates1.x + 0.5, chunkcoordinates1.y, chunkcoordinates1.z + 0.5);
                 } else {
-                    entityplayer1.netServerHandler.sendPacket(new Packet70Bed(0));
+                    // uberbukkit
+                    if (Uberbukkit.getProtocolHandler().canReceivePacket(70)) {
+                        entityplayer1.netServerHandler.sendPacket(new Packet70Bed(0));
+                    }
                 }
             }
 
@@ -643,7 +649,8 @@ public class ServerConfigurationManager {
 
     public void a(EntityPlayer entityplayer, WorldServer worldserver) {
         entityplayer.netServerHandler.sendPacket(new Packet4UpdateTime(worldserver.getTime()));
-        if (worldserver.v()) {
+        // uberbukkit
+        if (worldserver.v() && Uberbukkit.getProtocolHandler().canReceivePacket(70)) {
             entityplayer.netServerHandler.sendPacket(new Packet70Bed(1));
         }
     }
