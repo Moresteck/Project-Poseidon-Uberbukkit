@@ -51,7 +51,7 @@ public class ItemBlock extends Item {
 
         if (itemstack.count == 0) {
             return false;
-        } else if (!PoseidonConfig.getInstance().getBoolean("version.mechanics.allow_blocks_at_y_128", false) && j == 127 && Block.byId[this.id].material.isBuildable()) {
+        } else if (!PoseidonConfig.getInstance().getBoolean("version.mechanics.allow_blocks_at_y_127", false) && j == 127 && Block.byId[this.id].material.isBuildable()) {
             return false;
         } else if (world.a(this.id, i, j, k, false, l)) {
             Block block = Block.byId[this.id];
