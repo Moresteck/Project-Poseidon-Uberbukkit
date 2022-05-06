@@ -6,6 +6,8 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
 // CraftBukkit end
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 public class ItemBlock extends Item {
 
     private int id;
@@ -49,7 +51,7 @@ public class ItemBlock extends Item {
 
         if (itemstack.count == 0) {
             return false;
-        } else if (j == 127 && Block.byId[this.id].material.isBuildable()) {
+        } else if (!PoseidonConfig.getInstance().getBoolean("version.mechanics.allow_blocks_at_y_128", false) && j == 127 && Block.byId[this.id].material.isBuildable()) {
             return false;
         } else if (world.a(this.id, i, j, k, false, l)) {
             Block block = Block.byId[this.id];

@@ -41,7 +41,7 @@ public class ItemSign extends Item {
                 ++i;
             }
 
-            if (!Block.SIGN_POST.canPlace(world, i, j, k)) {
+            if (!Block.SIGN_POST.canPlace(world, i, j, k) || j >= 128 || j < 0) {
                 return false;
             } else {
                 CraftBlockState blockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
