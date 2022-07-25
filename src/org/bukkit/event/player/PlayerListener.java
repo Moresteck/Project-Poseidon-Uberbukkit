@@ -23,6 +23,13 @@ public class PlayerListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {}
 
     /**
+     * Called after a player changes to a new world
+     *
+     * @param event Relevant event details
+     */
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {}
+
+    /**
      * Called when a player gets kicked from the server
      *
      * @param event Relevant event details
@@ -191,4 +198,11 @@ public class PlayerListener implements Listener {
      * @param event Relevant event details
      */
     public void onPlayerFish(PlayerFishEvent event) {}
+    
+    /**
+     * Called when a player used item is damaged
+     *
+     * @param event Relevant event details
+     */
+    public void onPlayerItemDamage(PlayerItemDamageEvent event) {}
 }
