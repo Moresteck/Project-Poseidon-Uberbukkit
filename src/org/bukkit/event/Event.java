@@ -289,6 +289,12 @@ public abstract class Event implements Serializable {
          */
         PLAYER_PICKUP_ITEM(Category.PLAYER),
         /**
+         * Called after a player has changed to a new world
+         *
+         * @see org.bukkit.event.player.PlayerChangedWorldEvent
+         */
+        PLAYER_CHANGED_WORLD(Category.PLAYER),
+        /**
          * Called when a player empties a bucket
          *
          * @see org.bukkit.event.player.PlayerBucketEmptyEvent
@@ -324,6 +330,12 @@ public abstract class Event implements Serializable {
          * @see org.bukkit.event.player.PlayerFishEvent
          */
         PLAYER_FISH(Category.PLAYER),
+        /**
+         * Called when a player used item is damaged
+         *
+         * @see org.bukkit.event.player.PlayerItemDamageEvent
+         */
+        PLAYER_ITEM_DAMAGE(Category.PLAYER),
 
         /**
          * BLOCK EVENTS
