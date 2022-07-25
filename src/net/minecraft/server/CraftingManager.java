@@ -38,6 +38,13 @@ public class CraftingManager {
         if (Uberbukkit.getPVN() >= 9) {
             this.registerShapedRecipe(new ItemStack(Item.DIODE, 1), new Object[] { "#X#", "III", Character.valueOf('#'), Block.REDSTONE_TORCH_ON, Character.valueOf('X'), Item.REDSTONE, Character.valueOf('I'), Block.STONE});
             this.registerShapedRecipe(new ItemStack(Item.BED, 1), new Object[] { "###", "XXX", Character.valueOf('#'), Block.WOOL, Character.valueOf('X'), Block.WOOD});
+
+            // pressure plate recipe
+            this.registerShapedRecipe(new ItemStack(Block.STONE_PLATE, 1), new Object[] { "##", Character.valueOf('#'), Block.STONE});
+            this.registerShapedRecipe(new ItemStack(Block.WOOD_PLATE, 1), new Object[] { "##", Character.valueOf('#'), Block.WOOD});
+        } else {
+            this.registerShapedRecipe(new ItemStack(Block.STONE_PLATE, 1), new Object[] { "###", Character.valueOf('#'), Block.STONE});
+            this.registerShapedRecipe(new ItemStack(Block.WOOD_PLATE, 1), new Object[] { "###", Character.valueOf('#'), Block.WOOD});
         }
 
         if (Uberbukkit.getPVN() >= 11) {
@@ -130,8 +137,7 @@ public class CraftingManager {
         this.registerShapedRecipe(new ItemStack(Item.WATCH, 1), new Object[] { " # ", "#X#", " # ", Character.valueOf('#'), Item.GOLD_INGOT, Character.valueOf('X'), Item.REDSTONE});
         this.registerShapedRecipe(new ItemStack(Item.COMPASS, 1), new Object[] { " # ", "#X#", " # ", Character.valueOf('#'), Item.IRON_INGOT, Character.valueOf('X'), Item.REDSTONE});
         this.registerShapedRecipe(new ItemStack(Block.STONE_BUTTON, 1), new Object[] { "#", "#", Character.valueOf('#'), Block.STONE});
-        this.registerShapedRecipe(new ItemStack(Block.STONE_PLATE, 1), new Object[] { "##", Character.valueOf('#'), Block.STONE});
-        this.registerShapedRecipe(new ItemStack(Block.WOOD_PLATE, 1), new Object[] { "##", Character.valueOf('#'), Block.WOOD});
+
         Collections.sort(this.b, new RecipeSorter(this));
         System.out.println(this.b.size() + " recipes");
     }

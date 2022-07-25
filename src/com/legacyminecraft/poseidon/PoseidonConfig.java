@@ -132,6 +132,7 @@ public class PoseidonConfig extends Configuration {
         generateConfigOption("version.mechanics.drop_saplings_of_leaf_type", true);
         generateConfigOption("version.mechanics.spiders_trample_crops", false);
         generateConfigOption("version.mechanics.spiders_climb_walls", true);
+        generateConfigOption("version.mechanics.drop_lapis_as_b1_2", false);
         generateConfigOption("version.worldgen.ores.world.custom_seed", false);
         generateConfigOption("version.worldgen.ores.world.seed", 0L);
         generateConfigOption("version.experimental.force_fix_chunk_coords_corruption", false);
