@@ -184,6 +184,7 @@ public class PoseidonConfig extends Configuration {
         generateConfigOption("version.worldgen.generate_tallgrass", true);
         generateConfigOption("version.worldgen.ores.world.custom_seed", false);
         generateConfigOption("version.worldgen.ores.world.seed", 0L);
+		generateConfigOption("version.worldgen.generate_lakes", true);
 
         generateConfigOption("version.mechanics.tile_grass_drop_seeds", false);
         generateConfigOption("version.mechanics.flammable_fences_stairs", true);
@@ -237,6 +238,7 @@ public class PoseidonConfig extends Configuration {
 
         generateConfigOption("emergency.debug.regenerate-corrupt-chunks.enable", false);
         generateConfigOption("emergency.debug.regenerate-corrupt-chunks.info", "This setting allows you to automatically regenerate corrupt chunks. This is useful after a ungraceful shutdown while a file is being written to or out of memory exception.");
+		generateConfigOption("version.uberclient.alphamode", false);
 
         //Messages
         generateConfigOption("message.kick.banned", "You are banned from this server!");

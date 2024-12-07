@@ -341,21 +341,24 @@ public class ChunkProviderGenerate implements IChunkProvider {
         int l1;
         int i2;
 
-        if (this.j.nextInt(4) == 0) {
-            k1 = k + this.j.nextInt(16) + 8;
-            l1 = this.j.nextInt(128);
-            i2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLakes(Block.STATIONARY_WATER.id)).a(this.p, this.j, k1, l1, i2);
-        }
+		// uberbukkit
+		if (PoseidonConfig.getInstance().getBoolean("version.worldgen.generate_lakes", true)) {
+			if (this.j.nextInt(4) == 0) {
+				k1 = k + this.j.nextInt(16) + 8;
+				l1 = this.j.nextInt(128);
+				i2 = l + this.j.nextInt(16) + 8;
+				(new WorldGenLakes(Block.STATIONARY_WATER.id)).a(this.p, this.j, k1, l1, i2);
+			}
 
-        if (this.j.nextInt(8) == 0) {
-            k1 = k + this.j.nextInt(16) + 8;
-            l1 = this.j.nextInt(this.j.nextInt(120) + 8);
-            i2 = l + this.j.nextInt(16) + 8;
-            if (l1 < 64 || this.j.nextInt(10) == 0) {
-                (new WorldGenLakes(Block.STATIONARY_LAVA.id)).a(this.p, this.j, k1, l1, i2);
-            }
-        }
+			if (this.j.nextInt(8) == 0) {
+				k1 = k + this.j.nextInt(16) + 8;
+				l1 = this.j.nextInt(this.j.nextInt(120) + 8);
+				i2 = l + this.j.nextInt(16) + 8;
+				if (l1 < 64 || this.j.nextInt(10) == 0) {
+					(new WorldGenLakes(Block.STATIONARY_LAVA.id)).a(this.p, this.j, k1, l1, i2);
+				}
+			}
+		}
 
         int j2;
 
