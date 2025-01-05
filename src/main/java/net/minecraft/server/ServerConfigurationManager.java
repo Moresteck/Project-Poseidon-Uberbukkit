@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 
+import uk.betacraft.uberbukkit.UberbukkitConfig;
 import uk.betacraft.uberbukkit.packet.Packet62Sound;
 
 import org.bukkit.Bukkit;
@@ -38,6 +39,9 @@ public class ServerConfigurationManager {
     // CraftBukkit start
     private CraftServer cserver;
     private final String msgKickBanned, msgKickIPBanned, msgKickWhitelist, msgKickServerFull, msgPlayerJoin, msgPlayerLeave;
+
+    // uberbukkit
+    public static final boolean extendedFontSupportEnabled = UberbukkitConfig.getInstance().getBoolean("client.mods.extended-font.enabled", true);
 
     public ServerConfigurationManager(MinecraftServer minecraftserver) {
         minecraftserver.server = new CraftServer(minecraftserver, this);
@@ -121,7 +125,8 @@ public class ServerConfigurationManager {
         }
 
         // uberbukkit --- extended-font support
-        entityplayer.netServerHandler.sendPacket(new Packet3Chat("§3§2§6§2§6§1§8§0§3§1§9§1§8§0"));
+        if (extendedFontSupportEnabled)
+            entityplayer.netServerHandler.sendPacket(new Packet3Chat("§3§2§6§2§6§1§8§0§3§1§9§1§8§0"));
 
         // CraftBukkit start
         Player player = this.cserver.getPlayer(entityplayer);
