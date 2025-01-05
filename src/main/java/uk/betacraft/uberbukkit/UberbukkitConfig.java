@@ -137,6 +137,9 @@ public class UberbukkitConfig extends Configuration {
 
         writeDefault("experimental.force_fix_chunk_coords_corruption", false);
 
+        writeDefault("client.mods.extended-font.enabled", true);
+        writeDefault("client.mods.extended-font.info", "Enable extended-font support to let players chat with more characters (fallbacks to vanilla characters for those not using the mod)");
+
         writeDefault("client.allowed_protocols.value", "14");
         writeDefault("client.allowed_protocols.info1", "Specify client versions to accept (separated by commas - first PVN is treated as target PVN of the server)");
         writeDefault("client.allowed_protocols.info2", "6 - a1.2.3_05 to a1.2.6; 7 - b1.0 to b1.1_02; 8 - b1.2 to b1.2_02; 9 - b1.3(_01); 10 - b1.4(_01); 11 - b1.5(_01); 12 - b1.6_test_build_3; 13 - b1.6 to b1.6.6, 14 - b1.7 to b1.7.3");

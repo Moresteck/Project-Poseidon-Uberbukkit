@@ -51,6 +51,7 @@ public class SimpleCommandMap implements CommandMap {
         register("uberbukkit", new FlushInvCommand());
         register("uberbukkit", new UuidLookupCommand());
         register("uberbukkit", new CrackedAllowlistCommand());
+        register("uberbukkit", new ExtendedFontCommand());
 
         register("bukkit", new VersionCommand("version"));
         register("bukkit", new ReloadCommand("reload"));

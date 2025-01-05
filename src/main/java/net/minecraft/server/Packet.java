@@ -27,6 +27,7 @@ public abstract class Packet {
     private static int f;
 
     protected int pvn; // uberbukkit
+    protected boolean extendedFontSupport = false; // uberbukkit
 
     public Packet() {
     }

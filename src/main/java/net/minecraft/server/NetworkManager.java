@@ -56,6 +56,7 @@ public class NetworkManager {
     // uberbukkit
     public int pvn = 0;
     public Protocol protocol = null;
+    public boolean hasExtendedFontMod = false;
 
     public NetworkManager(Socket socket, String s, NetHandler nethandler) {
         this.socket = socket;
@@ -131,6 +132,8 @@ public class NetworkManager {
 
             // uberbukkit
             if (this.pvn != 0) packet.pvn = this.pvn;
+
+            packet.extendedFontSupport = this.hasExtendedFontMod;
 
             synchronized (this.g) {
                 this.x += packet.a() + 1;

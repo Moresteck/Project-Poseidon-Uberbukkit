@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import uk.betacraft.uberbukkit.mods.ExtendedFont;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,10 +34,17 @@ public class Packet3Chat extends Packet {
 
     public void a(DataOutputStream dataoutputstream) throws IOException { // CraftBukkit
         // uberbukkit
-        if (this.pvn >= 11) {
-            a(this.message, dataoutputstream);
+        String msg;
+        if (!this.extendedFontSupport) {
+            msg = ExtendedFont.translateToVanilla(this.message);
         } else {
-            dataoutputstream.writeUTF(this.message);
+            msg = this.message;
+        }
+
+        if (this.pvn >= 11) {
+            a(msg, dataoutputstream);
+        } else {
+            dataoutputstream.writeUTF(msg);
         }
     }
 

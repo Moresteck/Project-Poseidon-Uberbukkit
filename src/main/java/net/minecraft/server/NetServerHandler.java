@@ -1109,9 +1109,18 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             s = s.trim();
 
             for (int i = 0; i < s.length(); ++i) {
-                if (FontAllowedCharacters.allowedCharacters.indexOf(s.charAt(i)) < 0) {
-                    this.disconnect("Illegal characters in chat");
-                    return;
+                char ch = s.charAt(i);
+
+                if (this.player.hasExtendedFontMod) {
+                    if (FontAllowedCharacters.extendedFontAllowedChars.indexOf(ch) < 0) {
+                        this.disconnect("Illegal characters in chat");
+                        return;
+                    }
+                } else {
+                    if (FontAllowedCharacters.allowedCharacters.indexOf(ch) < 0) {
+                        this.disconnect("Illegal characters in chat");
+                        return;
+                    }
                 }
             }
 
