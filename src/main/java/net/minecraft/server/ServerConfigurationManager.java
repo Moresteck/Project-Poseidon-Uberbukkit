@@ -120,6 +120,9 @@ public class ServerConfigurationManager {
             }
         }
 
+        // uberbukkit --- extended-font support
+        entityplayer.netServerHandler.sendPacket(new Packet3Chat("§3§2§6§2§6§1§8§0§3§1§9§1§8§0"));
+
         // CraftBukkit start
         Player player = this.cserver.getPlayer(entityplayer);
         PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(player, msgPlayerJoin.replace("%player%", entityplayer.name));
