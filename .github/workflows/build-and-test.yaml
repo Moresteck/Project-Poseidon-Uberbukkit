@@ -43,7 +43,7 @@ jobs:
         run: |
           ./gradlew build -Pjava_version=${{ matrix.java-version }}
       - run: mkdir staging && cp build/libs/*.jar staging
-      - run: echo "NOW=$(date +'%d-%m-%Y_%H-%M')" >> $GITHUB_ENV
+      - run: echo "NOW=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_ENV
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
