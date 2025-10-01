@@ -21,10 +21,10 @@ jobs:
           distribution: 'temurin'
           java-version: 8
 
-      # Step 3: Get the version from pom.xml
-      - name: Get the version from pom.xml
+      # Step 3: Get the version from gradle.properties
+      - name: Get the version from gradle.properties
         id: get_version
-        run: echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+        run: echo "PROJECT_VERSION=$(gradle -q properties | grep "^version:" | awk '{print $2}')" >> $GITHUB_ENV
 
       # Step 4: Fail if snapshot version
       - name: Fail if snapshot version
@@ -59,7 +59,7 @@ jobs:
           
           echo "app_name=${APP_NAME}" >> src/main/resources/version.properties
           echo "release_version=${{ env.RELEASE_VERSION }}" >> src/main/resources/version.properties
-          echo "maven_version=${{ env.PROJECT_VERSION }}" >> src/main/resources/version.properties
+          echo "gradle_version=${{ env.PROJECT_VERSION }}" >> src/main/resources/version.properties
           
           # Build Type
           if [[ "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -80,8 +80,8 @@ jobs:
           echo "build_author=${{ github.actor }}" >> src/main/resources/version.properties
 
       # Step 7: Build with Maven
-      - name: Build with Maven
-        run: mvn clean package
+      - name: Build with Gradle
+        run: gradle build
 
       # Step 8: Create GitHub Release
       - name: Create GitHub Release
@@ -91,6 +91,6 @@ jobs:
           tag_name: ${{ env.RELEASE_VERSION }}
           name: ${{ env.RELEASE_VERSION }}
           files: |
-            target/*.jar
+            build/lib/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
