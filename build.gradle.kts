@@ -74,10 +74,14 @@ tasks.named<Jar>("jar").configure {
     manifest {
         from("src/main/resources/META-INF/MANIFEST.MF")
     }
+
+    archiveClassifier = "original"
 }
 
 tasks.shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveClassifier = ""
 
     from(listOf(sourceSets.main.get().output))
 
