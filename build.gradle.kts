@@ -1,10 +1,8 @@
 // To import vars from gradle.properties, add an entry to buildSrc/src/main/kotlin/ProjectInfo.kt
 
-// Uncomment if you want to enforce version from gradle.properties
-// Must uncomment in gradle.properties and buildSrc too tho
-//java.toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
-//java.sourceCompatibility = JavaVersion.toVersion(javaVersion)
-//java.targetCompatibility = JavaVersion.toVersion(javaVersion)
+java.toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+java.sourceCompatibility = JavaVersion.toVersion(javaVersion)
+java.targetCompatibility = JavaVersion.toVersion(javaVersion)
 
 repositories {
     mavenCentral()

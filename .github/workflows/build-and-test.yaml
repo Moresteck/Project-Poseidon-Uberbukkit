@@ -19,6 +19,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Java ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
@@ -26,10 +27,11 @@ jobs:
           distribution: temurin
           java-package: jdk
           cache: gradle
+
       - name: Build with Gradle
         shell: bash
         run: |
-          ./gradlew build
+          ./gradlew build -Pjava_version=${{ matrix.java-version }}
       - run: mkdir staging && cp build/lib/*.jar staging
       - run: echo "NOW=$(date +'%d-%m-%Y_%H-%M')" >> $GITHUB_ENV
       - name: Upload artifacts
