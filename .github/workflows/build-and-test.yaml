@@ -20,6 +20,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: 8
+          distribution: temurin
+          java-package: jdk
+          cache: gradle
+
+      # for gradle build
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
