@@ -29,7 +29,7 @@ jobs:
       - name: Build with Gradle
         shell: bash
         run: |
-          gradle build
+          ./gradlew build
       - run: mkdir staging && cp build/lib/*.jar staging
       - run: echo "NOW=$(date +'%d-%m-%Y_%H-%M')" >> $GITHUB_ENV
       - name: Upload artifacts

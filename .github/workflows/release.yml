@@ -24,7 +24,7 @@ jobs:
       # Step 3: Get the version from gradle.properties
       - name: Get the version from gradle.properties
         id: get_version
-        run: echo "PROJECT_VERSION=$(gradle -q properties | grep "^version:" | awk '{print $2}')" >> $GITHUB_ENV
+        run: echo "PROJECT_VERSION=$(./gradlew -q properties | grep "^version:" | awk '{print $2}')" >> $GITHUB_ENV
 
       # Step 4: Fail if snapshot version
       - name: Fail if snapshot version
@@ -81,7 +81,7 @@ jobs:
 
       # Step 7: Build with Maven
       - name: Build with Gradle
-        run: gradle build
+        run: ./gradlew build
 
       # Step 8: Create GitHub Release
       - name: Create GitHub Release
