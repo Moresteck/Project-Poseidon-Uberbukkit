@@ -8,8 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Uberbukkit {
-    // TODO: Change this automatically migration to Gradle
-    private static final String version = "2.0.2";
+    private static final String version = BuildParameters.VERSION;
     private static Integer pvn = null;
     private static List<Integer> pvns = null;
 

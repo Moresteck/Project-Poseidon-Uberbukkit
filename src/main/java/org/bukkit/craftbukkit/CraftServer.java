@@ -44,6 +44,7 @@ import org.bukkit.util.permissions.DefaultPermissions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
+import uk.betacraft.uberbukkit.BuildParameters;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,10 +55,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class CraftServer implements Server {
-    private final String serverName = "Project Poseidon UberBukkit";
+    private final String serverName = BuildParameters.SERVER_SOFTWARE_NAME;
     //Poseidon Versions
     private final String serverEnvironment = "POSEIDON";
-    private final String serverVersion = "2.0.2";
+    private final String serverVersion = BuildParameters.VERSION;
     private final String releaseType = "DEVELOPMENT";
     private final String protocolVersion = "1.7.3";
     private final String GameVersion = "b1.7.3";

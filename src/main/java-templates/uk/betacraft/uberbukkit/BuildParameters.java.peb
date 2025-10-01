@@ -1,0 +1,6 @@
+package uk.betacraft.uberbukkit;
+
+public class BuildParameters {
+    public static final String SERVER_SOFTWARE_NAME = "{{ server_software_name }}";
+    public static final String VERSION = "{{ version }}";
+}

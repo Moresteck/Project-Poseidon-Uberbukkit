@@ -9,3 +9,5 @@ dependency-reduced-pom.xml
 .DS_Store
 
 run/
+/.gradle
+/buildSrc/.gradle
