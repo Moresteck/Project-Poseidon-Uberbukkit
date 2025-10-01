@@ -54,7 +54,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class CraftServer implements Server {
-    private final String serverName = "Project Poseidon Uberbukkit";
+    private final String serverName = "Project Poseidon UberBukkit";
     //Poseidon Versions
     private final String serverEnvironment = "POSEIDON";
     private final String serverVersion = "2.0.2";
