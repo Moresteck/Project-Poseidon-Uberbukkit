@@ -8,14 +8,14 @@ on:
       - reopened
   push:
     branches:
-      - develop
+      - develop-maven
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [ '8', '17' ]
+        java-version: [ '8' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
